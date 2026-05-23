@@ -8,20 +8,19 @@ export default function WhatToEatToday() {
   const [avatarStep, setAvatarStep] = useState(0);
   const [avatarPath, setAvatarPath] = useState(null);
   const [healthMode, setHealthMode] = useState(false);
+  const [specialMode, setSpecialMode] = useState(false);
   const [selectedHealthGoals, setSelectedHealthGoals] = useState([]);
   const [selectedMoods, setSelectedMoods] = useState([]);
   const [dislikedFoods, setDislikedFoods] = useState([]);
   const [allergies, setAllergies] = useState([]);
   const [communityTab, setCommunityTab] = useState('discover');
   
-  // QQ秀-style customization state
   const [customGender, setCustomGender] = useState('female');
   const [customHair, setCustomHair] = useState(0);
   const [customOutfit, setCustomOutfit] = useState(0);
   const [customAccessory, setCustomAccessory] = useState(0);
   const [customBg, setCustomBg] = useState(0);
 
-  // Random picker state
   const [randomMode, setRandomMode] = useState('cook');
   const [randomResult, setRandomResult] = useState(null);
   const [isRolling, setIsRolling] = useState(false);
@@ -75,14 +74,18 @@ export default function WhatToEatToday() {
   ];
 
   const dishSuggestions = [
-    { name: '番茄鸡蛋面', emoji: '🍜', time: '15 分钟', why: '忙碌一天最治愈的味道', tags: ['简单', '舒心'], type: 'cook' },
-    { name: '清蒸鲈鱼', emoji: '🐟', time: '25 分钟', why: '清淡鲜美,营养均衡', tags: ['健康', '清淡'], type: 'cook' },
-    { name: '麻婆豆腐', emoji: '🌶️', time: '20 分钟', why: '经典川菜,下饭神器', tags: ['辣', '下饭'], type: 'cook' },
-    { name: '皮蛋瘦肉粥', emoji: '🥣', time: '30 分钟', why: '暖胃又暖心', tags: ['舒心', '温和'], type: 'cook' },
-    { name: '青椒肉丝', emoji: '🥢', time: '15 分钟', why: '简单家常,百吃不厌', tags: ['家常', '快手'], type: 'cook' },
-    { name: '红烧排骨', emoji: '🍖', time: '40 分钟', why: '妈妈的味道,温暖治愈', tags: ['家常', '下饭'], type: 'cook' },
-    { name: '蛋炒饭', emoji: '🍚', time: '10 分钟', why: '随手就有的快手菜', tags: ['快手', '简单'], type: 'cook' },
-    { name: '凉拌黄瓜', emoji: '🥒', time: '5 分钟', why: '清爽开胃的小菜', tags: ['清爽', '夏天'], type: 'cook' },
+    { name: '番茄鸡蛋面', emoji: '🍜', time: '15 分钟', why: '忙碌一天最治愈的味道', tags: ['简单', '舒心'], type: 'cook', healthGoals: ['养胃护胃', '儿童营养'], moods: ['comfort', 'tired', 'sick', 'lazy'], dislikes: ['noodle', 'soup'], allergens: ['egg', 'gluten'] },
+    { name: '清蒸鲈鱼', emoji: '🐟', time: '25 分钟', why: '清淡鲜美,营养均衡', tags: ['健康', '清淡'], type: 'cook', healthGoals: ['高蛋白', '减脂', '孕期营养', '产后修复', '老人易消化'], moods: ['happy', 'excited'], dislikes: ['oily', 'spicy-now'], allergens: ['seafood-a'] },
+    { name: '麻婆豆腐', emoji: '🌶️', time: '20 分钟', why: '经典川菜,下饭神器', tags: ['辣', '下饭'], type: 'cook', healthGoals: ['高蛋白'], moods: ['happy', 'excited', 'stressed'], dislikes: ['spicy-now', 'heavy'], allergens: [] },
+    { name: '皮蛋瘦肉粥', emoji: '🥣', time: '30 分钟', why: '暖胃又暖心', tags: ['舒心', '温和'], type: 'cook', healthGoals: ['养胃护胃', '老人易消化', '儿童营养'], moods: ['sick', 'tired', 'comfort', 'sad'], dislikes: ['heavy'], allergens: ['egg'] },
+    { name: '青椒肉丝', emoji: '🥢', time: '15 分钟', why: '简单家常,百吃不厌', tags: ['家常', '快手'], type: 'cook', healthGoals: ['高蛋白'], moods: ['lazy', 'comfort'], dislikes: [], allergens: [] },
+    { name: '红烧排骨', emoji: '🍖', time: '40 分钟', why: '妈妈的味道,温暖治愈', tags: ['家常', '下饭'], type: 'cook', healthGoals: ['增肌', '高蛋白'], moods: ['happy', 'comfort'], dislikes: ['oily', 'heavy'], allergens: [] },
+    { name: '蛋炒饭', emoji: '🍚', time: '10 分钟', why: '随手就有的快手菜', tags: ['快手', '简单'], type: 'cook', healthGoals: ['儿童营养'], moods: ['lazy', 'tired'], dislikes: ['rice'], allergens: ['egg'] },
+    { name: '凉拌黄瓜', emoji: '🥒', time: '5 分钟', why: '清爽开胃的小菜', tags: ['清爽', '夏天'], type: 'cook', healthGoals: ['减肥瘦身', '减脂', '低热量', '清肠排毒'], moods: ['happy', 'lazy'], dislikes: ['cold-food', 'sour'], allergens: [] },
+    { name: '小米南瓜粥', emoji: '🎃', time: '35 分钟', why: '黄澄澄的粥,养胃又养颜', tags: ['温和', '养生'], type: 'cook', healthGoals: ['养胃护胃', '经期调理', '补血养颜', '孕期营养', '产后修复', '老人易消化'], moods: ['sick', 'tired', 'comfort', 'sad'], dislikes: ['heavy'], allergens: [] },
+    { name: '蒜蓉西兰花', emoji: '🥦', time: '10 分钟', why: '清爽不长肉,健身餐必备', tags: ['清淡', '健康'], type: 'cook', healthGoals: ['减肥瘦身', '减脂', '低碳水', '低热量', '提升免疫', '糖尿病友好'], moods: ['happy', 'comfort'], dislikes: [], allergens: [] },
+    { name: '鸡胸肉沙拉', emoji: '🥗', time: '20 分钟', why: '高蛋白低脂,健身首选', tags: ['健康', '沙拉'], type: 'cook', healthGoals: ['减肥瘦身', '减脂', '增肌', '高蛋白', '低碳水', '糖尿病友好'], moods: ['happy', 'excited'], dislikes: ['cold-food'], allergens: [] },
+    { name: '红枣枸杞银耳羹', emoji: '🍵', time: '60 分钟', why: '女生的滋补佳品,养颜安神', tags: ['养生', '甜品'], type: 'cook', healthGoals: ['补血养颜', '经期调理', '助眠安神', '产后修复'], moods: ['tired', 'comfort', 'sad'], dislikes: ['sweet'], allergens: [] },
   ];
 
   const restaurants = [
@@ -193,6 +196,58 @@ export default function WhatToEatToday() {
     setAllergies(prev => prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]);
   };
 
+  // 智能匹配函数:根据用户选择的健康目标、心情、不想吃、过敏 → 给每道菜打分,返回排序后的推荐
+  const getRecommendedDishes = () => {
+    const activeHealth = healthMode ? selectedHealthGoals : [];
+    const activeMoods = specialMode ? selectedMoods : [];
+    const activeDislikes = specialMode ? dislikedFoods : [];
+
+    if (activeHealth.length === 0 && activeMoods.length === 0 && activeDislikes.length === 0 && (!specialMode || allergies.length === 0)) {
+      return { dishes: dishSuggestions.slice(0, 4), isFiltered: false };
+    }
+
+    let candidates = dishSuggestions.filter(dish => {
+      if (specialMode && allergies.length > 0) {
+        if (dish.allergens && dish.allergens.some(a => allergies.includes(a))) {
+          return false;
+        }
+      }
+      if (activeDislikes.length > 0) {
+        if (dish.dislikes && dish.dislikes.some(d => activeDislikes.includes(d))) {
+          return false;
+        }
+      }
+      return true;
+    });
+
+    const scored = candidates.map(dish => {
+      let score = 0;
+      if (activeHealth.length > 0) {
+        const goalLabels = activeHealth.map(gId => {
+          const found = healthGoals.find(g => g.id === gId);
+          return found ? found.label : '';
+        });
+        dish.healthGoals?.forEach(g => {
+          if (goalLabels.includes(g)) score += 3;
+        });
+      }
+      if (activeMoods.length > 0) {
+        dish.moods?.forEach(m => {
+          if (activeMoods.includes(m)) score += 2;
+        });
+      }
+      return { ...dish, score };
+    });
+
+    const matched = scored.filter(d => d.score > 0).sort((a, b) => b.score - a.score);
+    
+    if (matched.length > 0) {
+      return { dishes: matched.slice(0, 6), isFiltered: true };
+    } else {
+      return { dishes: candidates.slice(0, 4), isFiltered: true, noMatch: true };
+    }
+  };
+
   const currentAvatarConfig = {
     gender: customGender,
     hair: customHair,
@@ -201,7 +256,6 @@ export default function WhatToEatToday() {
     bg: customBg,
   };
 
-  // FIXED: Stagger state updates to prevent DOM crash in production
   const rollRandom = () => {
     setIsRolling(true);
     setRandomResult(null);
@@ -221,7 +275,6 @@ export default function WhatToEatToday() {
     }, 80);
   };
 
-  // ============ ONBOARDING ============
   if (screen === 'onboarding') {
     return (
       <div className="w-full max-w-sm mx-auto bg-gradient-to-b from-orange-50 to-amber-50 min-h-screen flex flex-col items-center justify-center p-6 text-center">
@@ -246,7 +299,6 @@ export default function WhatToEatToday() {
     );
   }
 
-  // ============ AVATAR CREATION ============
   if (screen === 'avatarCreate') {
     if (avatarStep === 0) {
       return (
@@ -391,7 +443,6 @@ export default function WhatToEatToday() {
     }
   }
 
-  // ============ HOME ============
   if (screen === 'home') {
     const g = greeting();
     const avatarConfig = selectedAvatar || { gender: 'female', hair: 0, outfit: 0, accessory: 0, bg: 0 };
@@ -487,8 +538,8 @@ export default function WhatToEatToday() {
     );
   }
 
-  // ============ COOK AT HOME ============
   if (screen === 'cook') {
+    const rec = getRecommendedDishes();
     return (
       <div className="w-full max-w-sm mx-auto bg-gradient-to-b from-orange-50 to-amber-50 min-h-screen pb-24">
         <div className="p-6">
@@ -499,6 +550,7 @@ export default function WhatToEatToday() {
           <h2 className="text-2xl font-bold text-orange-900 mb-1">在家做饭 🏠</h2>
           <p className="text-orange-600 text-sm mb-5">挑一道暖心好菜</p>
 
+          {/* 健康模式 */}
           <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -583,77 +635,116 @@ export default function WhatToEatToday() {
             )}
           </div>
 
+          {/* 特别筛选 */}
           <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
-            <p className="text-sm font-semibold text-gray-700 mb-3">心情筛选 💭</p>
-            
-            <p className="text-xs text-gray-500 mb-2">今天的心情如何?</p>
-            <div className="flex gap-2 flex-wrap mb-4">
-              {moodOptions.map(mood => (
-                <button 
-                  key={mood.id}
-                  onClick={() => toggleMood(mood.id)}
-                  className={`text-xs px-3 py-1.5 rounded-full transition ${selectedMoods.includes(mood.id) ? 'bg-amber-500 text-white shadow-sm shadow-amber-200' : 'bg-amber-50 text-amber-700'}`}
-                >
-                  {mood.emoji} {mood.label}
-                </button>
-              ))}
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Sparkles size={18} className="text-amber-500" />
+                <span className="text-sm font-semibold text-gray-800">特别筛选</span>
+                {(selectedMoods.length + dislikedFoods.length + allergies.length) > 0 && (
+                  <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">{selectedMoods.length + dislikedFoods.length + allergies.length} 项</span>
+                )}
+              </div>
+              <button 
+                onClick={() => { setSpecialMode(!specialMode); if (specialMode) { setSelectedMoods([]); setDislikedFoods([]); setAllergies([]); } }}
+                className={`w-12 h-7 rounded-full p-0.5 transition ${specialMode ? 'bg-amber-500' : 'bg-gray-300'}`}
+              >
+                <div className={`w-6 h-6 rounded-full bg-white shadow transition-transform ${specialMode ? 'translate-x-5' : ''}`}></div>
+              </button>
             </div>
+            {specialMode && (
+              <div className="pt-3 border-t border-amber-100">
+                <p className="text-xs text-gray-500 mb-3">根据今天的情况,定制专属推荐</p>
 
-            <p className="text-xs text-gray-500 mb-2">今天不想吃什么?</p>
-            <div className="flex gap-2 flex-wrap mb-4">
-              {dislikeOptions.map(opt => (
-                <button 
-                  key={opt.id}
-                  onClick={() => toggleDislike(opt.id)}
-                  className={`text-xs px-3 py-1.5 rounded-full transition ${dislikedFoods.includes(opt.id) ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-600'}`}
-                >
-                  🚫 {opt.label}
-                </button>
-              ))}
-            </div>
+                <p className="text-xs font-semibold text-amber-600 mb-2">💭 今天的心情</p>
+                <div className="flex gap-2 flex-wrap mb-3">
+                  {moodOptions.map(mood => (
+                    <button 
+                      key={mood.id}
+                      onClick={() => toggleMood(mood.id)}
+                      className={`text-xs px-3 py-1.5 rounded-full transition ${selectedMoods.includes(mood.id) ? 'bg-amber-500 text-white shadow-sm shadow-amber-200' : 'bg-amber-50 text-amber-700'}`}
+                    >
+                      {mood.emoji} {mood.label}
+                    </button>
+                  ))}
+                </div>
 
-            <p className="text-xs text-gray-500 mb-2">⚠️ 过敏 / 不能吃</p>
-            <div className="flex gap-2 flex-wrap">
-              {allergyOptions.map(opt => (
-                <button 
-                  key={opt.id}
-                  onClick={() => toggleAllergy(opt.id)}
-                  className={`text-xs px-3 py-1.5 rounded-full transition ${allergies.includes(opt.id) ? 'bg-red-500 text-white shadow-sm shadow-red-200' : 'bg-red-50 text-red-700'}`}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
+                <p className="text-xs font-semibold text-gray-600 mb-2">🚫 今天不想吃</p>
+                <div className="flex gap-2 flex-wrap mb-3">
+                  {dislikeOptions.map(opt => (
+                    <button 
+                      key={opt.id}
+                      onClick={() => toggleDislike(opt.id)}
+                      className={`text-xs px-3 py-1.5 rounded-full transition ${dislikedFoods.includes(opt.id) ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-600'}`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
 
-            {(selectedMoods.length + dislikedFoods.length + allergies.length > 0) && (
-              <div className="mt-3 pt-3 border-t border-orange-50 flex items-center justify-between">
-                <p className="text-xs text-orange-600 font-medium">已为你过滤这些选项 ✓</p>
-                <button 
-                  onClick={() => { setSelectedMoods([]); setDislikedFoods([]); setAllergies([]); }}
-                  className="text-xs text-gray-500 font-medium"
-                >
-                  清空
-                </button>
+                <p className="text-xs font-semibold text-red-600 mb-2">⚠️ 过敏 / 不能吃</p>
+                <div className="flex gap-2 flex-wrap">
+                  {allergyOptions.map(opt => (
+                    <button 
+                      key={opt.id}
+                      onClick={() => toggleAllergy(opt.id)}
+                      className={`text-xs px-3 py-1.5 rounded-full transition ${allergies.includes(opt.id) ? 'bg-red-500 text-white shadow-sm shadow-red-200' : 'bg-red-50 text-red-700'}`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+
+                {(selectedMoods.length + dislikedFoods.length + allergies.length) > 0 && (
+                  <button 
+                    onClick={() => { setSelectedMoods([]); setDislikedFoods([]); setAllergies([]); }}
+                    className="text-xs text-gray-500 mt-3 font-medium"
+                  >
+                    清空选择
+                  </button>
+                )}
               </div>
             )}
           </div>
 
-          <p className="text-sm font-semibold text-gray-700 mb-3">为你推荐 🌟</p>
+          {/* 推荐区 */}
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-semibold text-gray-700">
+              {rec.isFiltered ? '为你定制 ✨' : '为你推荐 🌟'}
+            </p>
+            {rec.isFiltered && !rec.noMatch && (
+              <span className="text-xs text-orange-600 font-medium">已智能匹配 {rec.dishes.length} 道</span>
+            )}
+          </div>
+
+          {rec.noMatch && (
+            <div className="bg-amber-50 rounded-2xl p-3 mb-3 text-center">
+              <p className="text-xs text-amber-700">🤔 暂无完美匹配的菜品,先给你看看其他选择</p>
+            </div>
+          )}
+
           <div className="space-y-3">
-            {dishSuggestions.slice(0, 4).map((dish, i) => (
+            {rec.dishes.map((dish, i) => (
               <div key={i} className="bg-white rounded-2xl p-4 shadow-sm">
                 <div className="flex gap-3">
                   <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0">
                     {dish.emoji}
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-bold text-gray-900">{dish.name}</h4>
+                    <div className="flex items-start justify-between">
+                      <h4 className="font-bold text-gray-900">{dish.name}</h4>
+                      {rec.isFiltered && dish.score > 0 && (
+                        <span className="text-xs bg-gradient-to-r from-orange-400 to-amber-400 text-white px-2 py-0.5 rounded-full font-medium ml-2 flex-shrink-0">
+                          ✨ 推荐
+                        </span>
+                      )}
+                    </div>
                     <div className="flex items-center gap-1 text-xs text-gray-500 mt-0.5">
                       <Clock size={12} />
                       <span>{dish.time}</span>
                     </div>
                     <p className="text-xs text-orange-600 mt-1 italic">"{dish.why}"</p>
-                    <div className="flex gap-1 mt-2">
+                    <div className="flex gap-1 mt-2 flex-wrap">
                       {dish.tags.map(t => (
                         <span key={t} className="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full">{t}</span>
                       ))}
@@ -685,7 +776,6 @@ export default function WhatToEatToday() {
     );
   }
 
-  // ============ EAT OUT ============
   if (screen === 'eatout') {
     return (
       <div className="w-full max-w-sm mx-auto bg-gradient-to-b from-amber-50 to-orange-50 min-h-screen pb-24">
@@ -755,11 +845,10 @@ export default function WhatToEatToday() {
     );
   }
 
-  // ============ RANDOM PICKER ============
   if (screen === 'random') {
     const cards = randomMode === 'cook' ? dishSuggestions : restaurants;
-    const currentCard = cards[rollingIndex] || cards[0];
-    const displayCard = randomResult || currentCard;
+    const displayCard = randomResult || cards[rollingIndex] || cards[0];
+    const showEmpty = !randomResult && !isRolling;
     
     return (
       <div className="w-full max-w-sm mx-auto bg-gradient-to-b from-teal-50 to-emerald-50 min-h-screen pb-24">
@@ -823,19 +912,18 @@ export default function WhatToEatToday() {
             </div>
           )}
 
-          {/* FIXED: Stable card structure using single ternary */}
           <div className="relative h-80 mb-5">
             <div className="absolute inset-x-4 top-3 bottom-3 bg-white rounded-3xl shadow-md opacity-30 scale-90"></div>
             <div className="absolute inset-x-2 top-1.5 bottom-1.5 bg-white rounded-3xl shadow-md opacity-60 scale-95"></div>
             
             <div className="absolute inset-0 bg-white rounded-3xl shadow-xl p-6 flex flex-col items-center justify-center text-center">
-              {(!randomResult && !isRolling) ? (
+              {showEmpty ? (
                 <div className="text-gray-400">
                   <div className="text-7xl mb-3 opacity-30">🎴</div>
                   <p className="text-sm">点下方按钮开始</p>
                 </div>
               ) : (
-                <div className={isRolling ? 'animate-pulse' : ''}>
+                <div className={isRolling ? 'opacity-80' : ''}>
                   <div className="text-7xl mb-3">{displayCard.emoji}</div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">{displayCard.name}</h3>
                   {displayCard.why && (
@@ -852,7 +940,7 @@ export default function WhatToEatToday() {
                       </div>
                     </div>
                   )}
-                  {randomResult && displayCard.tags && (
+                  {displayCard.tags && randomResult && (
                     <div className="flex gap-1 mt-3 flex-wrap justify-center">
                       {displayCard.tags.map(t => (
                         <span key={t} className="text-xs bg-teal-50 text-teal-700 px-2 py-0.5 rounded-full">{t}</span>
@@ -877,13 +965,9 @@ export default function WhatToEatToday() {
               className="w-full bg-gradient-to-br from-teal-400 to-emerald-500 text-white py-4 rounded-2xl font-bold shadow-lg shadow-teal-200 active:scale-95 disabled:opacity-70 flex items-center justify-center gap-2 text-lg"
             >
               {isRolling ? (
-                <>
-                  <RotateCw size={20} className="animate-spin" /> 正在挑选...
-                </>
+                <span className="flex items-center gap-2"><RotateCw size={20} className="animate-spin" /> 正在挑选...</span>
               ) : (
-                <>
-                  <Sparkles size={20} /> 帮我决定!
-                </>
+                <span className="flex items-center gap-2"><Sparkles size={20} /> 帮我决定!</span>
               )}
             </button>
           ) : (
@@ -912,7 +996,6 @@ export default function WhatToEatToday() {
     );
   }
 
-  // ============ COMMUNITY ============
   if (screen === 'community') {
     return (
       <div className="w-full max-w-sm mx-auto bg-gradient-to-b from-amber-50 to-orange-50 min-h-screen pb-24">
@@ -1011,7 +1094,6 @@ export default function WhatToEatToday() {
     );
   }
 
-  // ============ PROFILE ============
   if (screen === 'profile') {
     const avatarConfig = selectedAvatar || { gender: 'female', hair: 0, outfit: 0, accessory: 0, bg: 0 };
     return (
@@ -1068,7 +1150,6 @@ export default function WhatToEatToday() {
   return null;
 }
 
-// ============ QQ秀-style Avatar ============
 function QQAvatar({ config, size = 'md', hideBg = false }) {
   const sizeMap = { xs: 48, sm: 80, md: 140, lg: 180, xl: 240 };
   const px = sizeMap[size];
@@ -1090,65 +1171,72 @@ function QQAvatar({ config, size = 'md', hideBg = false }) {
   const outfitColor = outfitColors[config.outfit];
   const [bgStart, bgEnd] = bgGradients[config.bg];
 
+  const uid = `${config.gender}-${config.hair}-${config.outfit}-${config.bg}-${size}`;
+
   return (
     <svg viewBox="0 0 200 200" width={px} height={px} xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <radialGradient id={`bg-${config.gender}-${config.bg}-${size}`} cx="50%" cy="40%">
+        <radialGradient id={`bg-${uid}`} cx="50%" cy="40%">
           <stop offset="0%" stopColor={bgStart} />
           <stop offset="100%" stopColor={bgEnd} />
         </radialGradient>
-        <radialGradient id={`face-${size}`} cx="40%" cy="40%">
+        <radialGradient id={`face-${uid}`} cx="40%" cy="40%">
           <stop offset="0%" stopColor="#fef3c7" />
           <stop offset="100%" stopColor="#fde68a" />
         </radialGradient>
-        <linearGradient id={`outfit-${config.outfit}-${size}`} x1="0%" y1="0%" x2="0%" y2="100%">
+        <linearGradient id={`outfit-${uid}`} x1="0%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" stopColor={outfitColor} stopOpacity="1" />
           <stop offset="100%" stopColor={outfitColor} stopOpacity="0.7" />
         </linearGradient>
       </defs>
       
       {!hideBg && (
-        <circle cx="100" cy="100" r="100" fill={`url(#bg-${config.gender}-${config.bg}-${size})`} />
+        <circle cx="100" cy="100" r="100" fill={`url(#bg-${uid})`} />
       )}
       
       <rect x="85" y="125" width="30" height="20" fill="#fde68a" rx="4" />
       
-      <path d="M 50 200 Q 50 145 100 140 Q 150 145 150 200 Z" fill={`url(#outfit-${config.outfit}-${size})`} />
+      <path d="M 50 200 Q 50 145 100 140 Q 150 145 150 200 Z" fill={`url(#outfit-${uid})`} />
       {config.outfit === 0 && (
-        <>
+        <g>
           <rect x="95" y="140" width="10" height="40" fill="#ffffff" opacity="0.5" />
           <circle cx="100" cy="155" r="3" fill="#ffffff" opacity="0.8" />
-        </>
+        </g>
       )}
       
-      <circle cx="100" cy="95" r="38" fill={`url(#face-${size})`} />
+      <circle cx="100" cy="95" r="38" fill={`url(#face-${uid})`} />
+      
       <ellipse cx="65" cy="98" rx="5" ry="8" fill="#fde68a" />
       <ellipse cx="135" cy="98" rx="5" ry="8" fill="#fde68a" />
       
       {isFemale && config.hair === 0 && (
-        <>
+        <g>
           <path d="M 62 90 Q 60 60 100 55 Q 140 60 138 90 Q 138 70 100 65 Q 70 68 62 90 Z" fill={hairColor} />
           <path d="M 62 90 L 62 105 Q 70 100 75 90 Z" fill={hairColor} />
           <path d="M 138 90 L 138 105 Q 130 100 125 90 Z" fill={hairColor} />
-        </>
+        </g>
       )}
       {isFemale && config.hair === 1 && (
-        <>
+        <g>
           <path d="M 60 90 Q 55 55 100 52 Q 145 55 140 90 L 140 165 Q 140 170 130 168 L 130 100 Q 120 92 100 90 Q 80 92 70 100 L 70 168 Q 60 170 60 165 Z" fill={hairColor} />
-        </>
+          <path d="M 62 70 Q 80 58 100 60" fill="none" stroke={hairColor} strokeWidth="3" />
+        </g>
       )}
       {isFemale && config.hair === 2 && (
-        <>
+        <g>
           <ellipse cx="100" cy="55" rx="22" ry="18" fill={hairColor} />
           <path d="M 65 90 Q 60 65 100 62 Q 140 65 135 90 Q 135 78 100 75 Q 70 78 65 90 Z" fill={hairColor} />
-        </>
+          <ellipse cx="100" cy="50" rx="15" ry="12" fill={hairColor} opacity="0.7" />
+        </g>
       )}
       {isFemale && config.hair === 3 && (
-        <>
+        <g>
           <path d="M 58 95 Q 55 58 100 53 Q 145 58 142 95 L 142 130 Q 138 135 130 130 L 130 100 Q 115 95 100 95 Q 85 95 70 100 L 70 130 Q 62 135 58 130 Z" fill={hairColor} />
           <circle cx="65" cy="80" r="6" fill={hairColor} />
           <circle cx="135" cy="80" r="6" fill={hairColor} />
-        </>
+          <circle cx="70" cy="120" r="8" fill={hairColor} />
+          <circle cx="130" cy="120" r="8" fill={hairColor} />
+        </g>
       )}
       
       {!isFemale && config.hair === 0 && (
@@ -1158,18 +1246,18 @@ function QQAvatar({ config, size = 'md', hideBg = false }) {
         <path d="M 62 95 Q 58 58 100 55 Q 142 58 138 95 L 138 110 Q 138 100 100 95 Q 70 95 62 110 Z" fill={hairColor} />
       )}
       {!isFemale && config.hair === 2 && (
-        <>
+        <g>
           <path d="M 65 88 Q 62 60 100 58 Q 138 60 135 88 Q 130 70 100 68 Q 75 70 65 88 Z" fill={hairColor} />
           <path d="M 80 62 L 75 50 L 88 60 Z" fill={hairColor} />
           <path d="M 100 58 L 98 45 L 105 58 Z" fill={hairColor} />
           <path d="M 118 60 L 125 50 L 120 65 Z" fill={hairColor} />
-        </>
+        </g>
       )}
       {!isFemale && config.hair === 3 && (
-        <>
+        <g>
           <path d="M 64 90 Q 60 60 100 56 Q 140 60 136 90 Q 132 72 105 70 Q 75 75 64 90 Z" fill={hairColor} />
           <path d="M 80 65 Q 100 60 130 72" fill="none" stroke={hairColor} strokeWidth="4" strokeLinecap="round" />
-        </>
+        </g>
       )}
       
       <ellipse cx="85" cy="98" rx="4" ry="5" fill="#1f2937" />
@@ -1210,7 +1298,6 @@ function QQAvatar({ config, size = 'md', hideBg = false }) {
   );
 }
 
-// ============ QQ秀 Customization Screen ============
 function QQXiuCustomization({ config, customGender, setCustomGender, customHair, setCustomHair, customOutfit, setCustomOutfit, customAccessory, setCustomAccessory, customBg, setCustomBg, hairOptions, outfitOptions, accessoryOptions, bgOptions, onBack, onDone }) {
   const [activeTab, setActiveTab] = useState('hair');
 
@@ -1275,6 +1362,11 @@ function QQXiuCustomization({ config, customGender, setCustomGender, customHair,
             >
               <div className="w-8 h-8 rounded-full" style={{ background: opt.color }}></div>
               <span className="mt-1 text-xs text-gray-700">{opt.name}</span>
+              {customHair === i && (
+                <div className="absolute top-1 right-1 bg-orange-500 rounded-full p-0.5">
+                  <Check size={10} className="text-white" />
+                </div>
+              )}
             </button>
           ))}
           
@@ -1286,6 +1378,11 @@ function QQXiuCustomization({ config, customGender, setCustomGender, customHair,
             >
               <div className="text-2xl">{opt.emoji}</div>
               <span className="text-xs text-gray-700 mt-0.5">{opt.name}</span>
+              {customOutfit === i && (
+                <div className="absolute top-1 right-1 bg-orange-500 rounded-full p-0.5">
+                  <Check size={10} className="text-white" />
+                </div>
+              )}
             </button>
           ))}
 
@@ -1297,6 +1394,11 @@ function QQXiuCustomization({ config, customGender, setCustomGender, customHair,
             >
               <div className="text-2xl">{opt.emoji || '—'}</div>
               <span className="text-xs text-gray-700 mt-0.5">{opt.name}</span>
+              {customAccessory === i && (
+                <div className="absolute top-1 right-1 bg-orange-500 rounded-full p-0.5">
+                  <Check size={10} className="text-white" />
+                </div>
+              )}
             </button>
           ))}
 
@@ -1305,7 +1407,13 @@ function QQXiuCustomization({ config, customGender, setCustomGender, customHair,
               key={opt.id}
               onClick={() => setCustomBg(i)}
               className={`aspect-square rounded-2xl flex items-center justify-center transition relative bg-gradient-to-br ${opt.color} ${customBg === i ? 'ring-2 ring-orange-400 scale-105' : ''}`}
-            ></button>
+            >
+              {customBg === i && (
+                <div className="absolute top-1 right-1 bg-orange-500 rounded-full p-0.5">
+                  <Check size={10} className="text-white" />
+                </div>
+              )}
+            </button>
           ))}
         </div>
 
