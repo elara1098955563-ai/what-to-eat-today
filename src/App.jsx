@@ -33,6 +33,10 @@ export default function WhatToEatToday() {
   const [cookActionMessage, setCookActionMessage] = useState('');
   const [plannedRecipeIds, setPlannedRecipeIds] = useState([]);
   const [shoppingRecipeIds, setShoppingRecipeIds] = useState([]);
+  const [cookStartModalDish, setCookStartModalDish] = useState(null);
+  const [cookShoppingModalDish, setCookShoppingModalDish] = useState(null);
+  const [customRecipes, setCustomRecipes] = useState([]);
+  const [customRestaurants, setCustomRestaurants] = useState([]);
   const [communityTab, setCommunityTab] = useState('discover');
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [showCreateAsk, setShowCreateAsk] = useState(false);
@@ -122,19 +126,25 @@ export default function WhatToEatToday() {
     { name: '街角咖啡', cuisine: '轻食咖啡', rating: 4.4, time: '步行 3 分钟', emoji: '☕', tag: '附近' },
   ];
 
-  const recipeCatalog = dishSuggestions.map((dish, index) => ({
+  const baseRecipeCatalog = dishSuggestions.map((dish, index) => ({
     ...dish,
     id: `recipe-${index + 1}`,
   }));
+  const recipeCatalog = [...baseRecipeCatalog, ...customRecipes];
 
-  const restaurantCatalog = restaurants.slice(0, 5).map((shop, index) => ({
+  const baseRestaurantCatalog = restaurants.slice(0, 5).map((shop, index) => ({
     ...shop,
     id: `rest-${index + 1}`,
   }));
+  const restaurantCatalog = [...baseRestaurantCatalog, ...customRestaurants];
 
+  const recipeIdSet = new Set(recipeCatalog.map(item => item.id));
+  const restaurantIdSet = new Set(restaurantCatalog.map(item => item.id));
+  const validRecipeFavoriteCount = favoriteRecipeIds.filter(id => recipeIdSet.has(id)).length;
+  const validRestaurantFavoriteCount = favoriteRestaurantIds.filter(id => restaurantIdSet.has(id)).length;
   const totalRecipeCount = recipeCatalog.length;
   const totalRestaurantCount = restaurantCatalog.length;
-  const totalFavoriteCount = favoriteRecipeIds.length + favoriteRestaurantIds.length;
+  const totalFavoriteCount = validRecipeFavoriteCount + validRestaurantFavoriteCount;
   const eatoutLocations = [
     { name: '新加坡 · 乌节路', tip: '本地必吃: 海南鸡饭、叻沙、肉骨茶' },
     { name: '上海 · 静安区', tip: '本地必吃: 生煎、蟹粉面、小笼包' },
@@ -225,6 +235,21 @@ export default function WhatToEatToday() {
     { title: '亚洲料理', icon: '🍜', items: ['日料', '韩餐', '泰餐', '越南菜', '印度菜', '新马菜'] },
     { title: '西餐与其他', icon: '🍽️', items: ['意大利', '法餐', '美式', '墨西哥', '地中海', '素食'] },
   ];
+
+  const shoppingGuideByDish = {
+    '番茄鸡蛋面': { main: '面条、鸡蛋 2 个、番茄 2 个', extra: '葱花、盐、生抽、香油' },
+    '清蒸鲈鱼': { main: '鲈鱼 1 条、姜片、葱段', extra: '蒸鱼豉油、盐、料酒' },
+    '麻婆豆腐': { main: '北豆腐 1 块、猪肉末、豆瓣酱', extra: '花椒粉、蒜末、生抽、淀粉' },
+    '皮蛋瘦肉粥': { main: '大米、瘦肉、皮蛋 1-2 个', extra: '姜丝、盐、白胡椒粉' },
+    '青椒肉丝': { main: '青椒、里脊肉、蒜片', extra: '生抽、蚝油、淀粉、盐' },
+    '红烧排骨': { main: '排骨、姜片、葱段', extra: '生抽、老抽、冰糖、八角' },
+    '蛋炒饭': { main: '隔夜米饭、鸡蛋 2 个', extra: '葱花、盐、胡萝卜丁' },
+    '凉拌黄瓜': { main: '黄瓜 2 根、蒜末', extra: '醋、生抽、芝麻油、盐' },
+    '小米南瓜粥': { main: '小米、南瓜块', extra: '冰糖（可选）' },
+    '蒜蓉西兰花': { main: '西兰花 1 颗、蒜末', extra: '盐、生抽、橄榄油' },
+    '鸡胸肉沙拉': { main: '鸡胸肉、生菜、番茄', extra: '黑胡椒、橄榄油、柠檬汁' },
+    '红枣枸杞银耳羹': { main: '银耳、红枣、枸杞', extra: '冰糖、清水' },
+  };
 
   const toggleRestriction = (id) => {
     setRestrictions(prev => prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]);
@@ -321,6 +346,44 @@ export default function WhatToEatToday() {
     setEatoutActionMessage('已切换地点,推荐已刷新');
   };
 
+  const addCustomRecipe = () => {
+    const now = Date.now();
+    setCustomRecipes(prev => [
+      {
+        id: `recipe-custom-${now}`,
+        name: `我的新菜谱 ${prev.length + 1}`,
+        emoji: '🍲',
+        time: '20 分钟',
+        why: '新收录到我的菜谱',
+        tags: ['自定义', '收藏'],
+        type: 'cook',
+        healthGoals: [],
+        moods: [],
+        dislikes: [],
+        allergens: [],
+      },
+      ...prev,
+    ]);
+  };
+
+  const addCustomRestaurant = () => {
+    const now = Date.now();
+    const location = eatoutLocations[eatoutLocationIndex];
+    setCustomRestaurants(prev => [
+      {
+        id: `rest-custom-${now}`,
+        name: `${location.name.split(' · ')[1]}小店 ${prev.length + 1}`,
+        cuisine: '本地特色',
+        rating: 4.6,
+        time: '步行 9 分钟',
+        emoji: '🍴',
+        tag: '新收录',
+      },
+      ...prev,
+    ]);
+    setEatoutActionMessage('已收录一家新餐厅,统计已更新');
+  };
+
   const getRecipeIdByName = (dishName) => {
     const recipe = recipeCatalog.find(item => item.name === dishName);
     return recipe ? recipe.id : null;
@@ -338,6 +401,22 @@ export default function WhatToEatToday() {
     if (!recipeId) return;
     setShoppingRecipeIds(prev => prev.includes(recipeId) ? prev.filter(id => id !== recipeId) : [...prev, recipeId]);
     setCookActionMessage(prev => prev === `${dishName} 已加入购物清单` ? `${dishName} 已从购物清单移除` : `${dishName} 已加入购物清单`);
+  };
+
+  const confirmCookStart = (dish) => {
+    const recipeId = getRecipeIdByName(dish.name);
+    if (!recipeId) return;
+    setPlannedRecipeIds(prev => prev.includes(recipeId) ? prev : [...prev, recipeId]);
+    setCookActionMessage(`已开始准备 ${dish.name}`);
+    setCookStartModalDish(null);
+  };
+
+  const confirmShoppingList = (dish) => {
+    const recipeId = getRecipeIdByName(dish.name);
+    if (!recipeId) return;
+    setShoppingRecipeIds(prev => prev.includes(recipeId) ? prev : [...prev, recipeId]);
+    setCookActionMessage(`${dish.name} 购物清单已加入`);
+    setCookShoppingModalDish(null);
   };
 
   useEffect(() => {
@@ -723,13 +802,6 @@ export default function WhatToEatToday() {
             toggleAllergy={toggleAllergy}
           />
 
-          <button
-            onClick={() => setScreen('healthStatus')}
-            className="w-full bg-white rounded-2xl p-3 mb-4 shadow-sm text-sm font-medium text-orange-700 active:bg-orange-50"
-          >
-            去“健康状况”页精细设置 →
-          </button>
-
           {(cookActionMessage || plannedRecipeIds.length > 0 || shoppingRecipeIds.length > 0) && (
             <div className="bg-white rounded-2xl p-3 mb-3 shadow-sm">
               {cookActionMessage && <p className="text-xs text-orange-700 mb-1">{cookActionMessage}</p>}
@@ -790,13 +862,13 @@ export default function WhatToEatToday() {
                 </div>
                 <div className="flex gap-2 mt-3 pt-3 border-t border-orange-50">
                   <button
-                    onClick={() => togglePlannedRecipe(dish.name)}
+                    onClick={() => setCookStartModalDish(dish)}
                     className={`flex-1 text-xs py-2 rounded-xl font-medium active:scale-95 ${planned ? 'bg-emerald-500 text-white' : 'bg-orange-500 text-white'}`}
                   >
                     {planned ? '已安排本餐' : '就做这个'}
                   </button>
                   <button
-                    onClick={() => toggleShoppingRecipe(dish.name)}
+                    onClick={() => setCookShoppingModalDish(dish)}
                     className={`px-3 py-2 text-xs rounded-xl flex items-center gap-1 active:scale-95 ${inShopping ? 'bg-amber-500 text-white' : 'bg-amber-50 text-amber-700'}`}
                   >
                     <ShoppingBasket size={14} /> 购物清单
@@ -819,6 +891,58 @@ export default function WhatToEatToday() {
             🔄 换一批
           </button>
         </div>
+
+        {cookStartModalDish && (
+          <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center px-6">
+            <div className="w-full max-w-xs bg-white rounded-2xl overflow-hidden text-center shadow-xl">
+              <div className="px-6 py-7">
+                <p className="text-3xl mb-3">{cookStartModalDish.emoji}</p>
+                <p className="text-3xl font-bold text-gray-900 mb-4">{cookStartModalDish.name}</p>
+                <p className="text-lg text-gray-500 mb-6">"{cookStartModalDish.why}"</p>
+                <p className="text-2xl text-gray-500 mb-6">⏱ {cookStartModalDish.time}</p>
+                <p className="text-2xl text-gray-500">开始做这道菜?</p>
+              </div>
+              <div className="grid grid-cols-2 border-t border-gray-100">
+                <button
+                  onClick={() => setCookStartModalDish(null)}
+                  className="py-3 text-2xl font-semibold text-gray-900 border-r border-gray-100"
+                >
+                  再看看
+                </button>
+                <button
+                  onClick={() => confirmCookStart(cookStartModalDish)}
+                  className="py-3 text-2xl font-semibold text-blue-600"
+                >
+                  开始做
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {cookShoppingModalDish && (
+          <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center px-6">
+            <div className="w-full max-w-xs bg-white rounded-2xl overflow-hidden text-center shadow-xl">
+              <div className="px-6 py-7">
+                <p className="text-3xl font-bold text-gray-900 mb-4">🛒 {cookShoppingModalDish.name} 购物清单</p>
+                <p className="text-lg text-gray-500 mb-4">
+                  主料:{shoppingGuideByDish[cookShoppingModalDish.name]?.main || '主食材 1 份、辅食材 2 份'}
+                </p>
+                <p className="text-lg text-gray-500">
+                  配料:{shoppingGuideByDish[cookShoppingModalDish.name]?.extra || '盐、生抽、香油'}
+                </p>
+              </div>
+              <div className="border-t border-gray-100">
+                <button
+                  onClick={() => confirmShoppingList(cookShoppingModalDish)}
+                  className="w-full py-3 text-2xl font-semibold text-blue-600"
+                >
+                  知道啦
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <BottomNav screen={screen} setScreen={setScreen} />
       </div>
@@ -913,6 +1037,13 @@ export default function WhatToEatToday() {
             <p className="text-sm font-semibold text-gray-700">附近热门 📍</p>
             <span className="text-xs text-amber-700">共 {filteredRestaurants.length} 家匹配</span>
           </div>
+
+          <button
+            onClick={addCustomRestaurant}
+            className="w-full mb-3 bg-white text-amber-700 py-2.5 rounded-2xl font-medium border border-amber-200 active:bg-amber-50"
+          >
+            + 收录附近新餐厅（统计联动）
+          </button>
 
           {visibleRestaurants.length === 0 ? (
             <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
@@ -1419,12 +1550,6 @@ export default function WhatToEatToday() {
             toggleAllergy={toggleAllergy}
           />
 
-          <button
-            onClick={() => setScreen('cook')}
-            className="w-full bg-white text-orange-700 py-3 rounded-2xl border border-orange-200 font-medium mt-2"
-          >
-            去做饭页查看推荐 →
-          </button>
         </div>
         <BottomNav screen={screen} setScreen={setScreen} />
       </div>
@@ -1563,6 +1688,13 @@ export default function WhatToEatToday() {
               ))}
             </div>
           )}
+
+          <button
+            onClick={addCustomRecipe}
+            className="w-full mt-4 bg-white text-orange-700 py-3 rounded-2xl border-2 border-dashed border-orange-300 font-medium active:bg-orange-50"
+          >
+            + 新增我的菜谱（统计联动）
+          </button>
         </div>
         <BottomNav screen={screen} setScreen={setScreen} />
       </div>
@@ -1740,7 +1872,7 @@ export default function WhatToEatToday() {
             <ProfileRow
               icon="📖"
               label="我的菜谱"
-              value={`${totalRecipeCount} 道菜 · 收藏 ${favoriteRecipeIds.length}`}
+              value={`${totalRecipeCount} 道菜 · 收藏 ${validRecipeFavoriteCount}`}
               onClick={() => setScreen('myRecipes')}
             />
             <ProfileRow
