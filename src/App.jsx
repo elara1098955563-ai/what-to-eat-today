@@ -13,7 +13,32 @@ export default function WhatToEatToday() {
   const [selectedMoods, setSelectedMoods] = useState([]);
   const [dislikedFoods, setDislikedFoods] = useState([]);
   const [allergies, setAllergies] = useState([]);
+  const [favoriteCuisines, setFavoriteCuisines] = useState([]);
+  const [recipeTab, setRecipeTab] = useState('all');
+  const [favoriteRecipeIds, setFavoriteRecipeIds] = useState(['recipe-1', 'recipe-2', 'recipe-4', 'recipe-6', 'recipe-9']);
+  const [favoriteRestaurantIds, setFavoriteRestaurantIds] = useState(['rest-1', 'rest-3', 'rest-5']);
+  const [familyMembers, setFamilyMembers] = useState([]);
+  const [settings, setSettings] = useState({
+    reminder: true,
+    autoSyncFilters: true,
+    darkMode: false,
+    privacyMode: true,
+  });
+  const [eatoutLocationIndex, setEatoutLocationIndex] = useState(0);
+  const [eatoutTravelMode, setEatoutTravelMode] = useState(true);
+  const [eatoutFilter, setEatoutFilter] = useState('all');
+  const [eatoutBatch, setEatoutBatch] = useState(0);
+  const [eatoutActionMessage, setEatoutActionMessage] = useState('');
+  const [cookBatch, setCookBatch] = useState(0);
+  const [cookActionMessage, setCookActionMessage] = useState('');
+  const [plannedRecipeIds, setPlannedRecipeIds] = useState([]);
+  const [shoppingRecipeIds, setShoppingRecipeIds] = useState([]);
   const [communityTab, setCommunityTab] = useState('discover');
+  const [showCreatePost, setShowCreatePost] = useState(false);
+  const [showCreateAsk, setShowCreateAsk] = useState(false);
+  const [newPostText, setNewPostText] = useState('');
+  const [newPostEmoji, setNewPostEmoji] = useState('🍲');
+  const [newAskText, setNewAskText] = useState('');
   
   const [customGender, setCustomGender] = useState('female');
   const [customHair, setCustomHair] = useState(0);
@@ -97,16 +122,35 @@ export default function WhatToEatToday() {
     { name: '街角咖啡', cuisine: '轻食咖啡', rating: 4.4, time: '步行 3 分钟', emoji: '☕', tag: '附近' },
   ];
 
-  const communityPosts = [
-    { user: '小美', dish: '今晚做了番茄鸡蛋面!', emoji: '🍜', reactions: { yum: 12, save: 5, curious: 2 }, time: '2 小时前', avatarConfig: { gender: 'female', hair: 0, outfit: 0, accessory: 1, bg: 0 } },
-    { user: '阿成', dish: '人民广场附近的小笼包绝了!', emoji: '🥟', reactions: { yum: 24, save: 18, curious: 6 }, time: '5 小时前', avatarConfig: { gender: 'male', hair: 2, outfit: 1, accessory: 0, bg: 1 } },
-    { user: '小林', dish: '下雨天最适合一碗热粥 💛', emoji: '🥣', reactions: { yum: 8, save: 3, curious: 1 }, time: '1 天前', avatarConfig: { gender: 'female', hair: 1, outfit: 3, accessory: 3, bg: 2 } },
+  const recipeCatalog = dishSuggestions.map((dish, index) => ({
+    ...dish,
+    id: `recipe-${index + 1}`,
+  }));
+
+  const restaurantCatalog = restaurants.slice(0, 5).map((shop, index) => ({
+    ...shop,
+    id: `rest-${index + 1}`,
+  }));
+
+  const totalRecipeCount = recipeCatalog.length;
+  const totalRestaurantCount = restaurantCatalog.length;
+  const totalFavoriteCount = favoriteRecipeIds.length + favoriteRestaurantIds.length;
+  const eatoutLocations = [
+    { name: '新加坡 · 乌节路', tip: '本地必吃: 海南鸡饭、叻沙、肉骨茶' },
+    { name: '上海 · 静安区', tip: '本地必吃: 生煎、蟹粉面、小笼包' },
+    { name: '成都 · 春熙路', tip: '本地必吃: 火锅、串串、钵钵鸡' },
   ];
 
-  const askPosts = [
-    { user: '小薇', question: '剩下的鸡肉怎么做好吃?', replies: 7, time: '30 分钟前', avatarConfig: { gender: 'female', hair: 3, outfit: 2, accessory: 0, bg: 2 } },
-    { user: '佳佳', question: '北京哪里有好吃的素饺子?', replies: 12, time: '2 小时前', avatarConfig: { gender: 'male', hair: 0, outfit: 1, accessory: 2, bg: 3 } },
-  ];
+  const [communityPosts, setCommunityPosts] = useState([
+    { id: 'cp-1', user: '小美', dish: '今晚做了番茄鸡蛋面!', emoji: '🍜', reactions: { yum: 12, save: 5, curious: 2 }, time: '2 小时前', avatarConfig: { gender: 'female', hair: 0, outfit: 0, accessory: 1, bg: 0 } },
+    { id: 'cp-2', user: '阿成', dish: '人民广场附近的小笼包绝了!', emoji: '🥟', reactions: { yum: 24, save: 18, curious: 6 }, time: '5 小时前', avatarConfig: { gender: 'male', hair: 2, outfit: 1, accessory: 0, bg: 1 } },
+    { id: 'cp-3', user: '小林', dish: '下雨天最适合一碗热粥 💛', emoji: '🥣', reactions: { yum: 8, save: 3, curious: 1 }, time: '1 天前', avatarConfig: { gender: 'female', hair: 1, outfit: 3, accessory: 3, bg: 2 } },
+  ]);
+
+  const [askPosts, setAskPosts] = useState([
+    { id: 'ap-1', user: '小薇', question: '剩下的鸡肉怎么做好吃?', replies: 7, time: '30 分钟前', avatarConfig: { gender: 'female', hair: 3, outfit: 2, accessory: 0, bg: 2 } },
+    { id: 'ap-2', user: '佳佳', question: '北京哪里有好吃的素饺子?', replies: 12, time: '2 小时前', avatarConfig: { gender: 'male', hair: 0, outfit: 1, accessory: 2, bg: 3 } },
+  ]);
 
   const restrictionOptions = [
     { id: 'spicy', label: '不吃辣' },
@@ -176,6 +220,12 @@ export default function WhatToEatToday() {
     { id: 'cilantro-a', label: '🌿 香菜' },
   ];
 
+  const cuisineGroups = [
+    { title: '中餐', icon: '🥢', items: ['川菜', '粤菜', '湘菜', '江浙菜', '京菜', '本帮菜', '东北菜', '西北菜', '火锅', '烧烤'] },
+    { title: '亚洲料理', icon: '🍜', items: ['日料', '韩餐', '泰餐', '越南菜', '印度菜', '新马菜'] },
+    { title: '西餐与其他', icon: '🍽️', items: ['意大利', '法餐', '美式', '墨西哥', '地中海', '素食'] },
+  ];
+
   const toggleRestriction = (id) => {
     setRestrictions(prev => prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]);
   };
@@ -195,6 +245,104 @@ export default function WhatToEatToday() {
   const toggleAllergy = (id) => {
     setAllergies(prev => prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]);
   };
+
+  const toggleCuisine = (name) => {
+    setFavoriteCuisines(prev => prev.includes(name) ? prev.filter(c => c !== name) : [...prev, name]);
+  };
+
+  const toggleSetting = (key) => {
+    setSettings(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const toggleRecipeFavorite = (id) => {
+    setFavoriteRecipeIds(prev => prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]);
+  };
+
+  const toggleRestaurantFavorite = (id) => {
+    setFavoriteRestaurantIds(prev => prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]);
+  };
+
+  const reactToCommunityPost = (postId, reaction) => {
+    setCommunityPosts(prev => prev.map(post => {
+      if (post.id !== postId) return post;
+      return {
+        ...post,
+        reactions: {
+          ...post.reactions,
+          [reaction]: post.reactions[reaction] + 1,
+        },
+      };
+    }));
+  };
+
+  const replyAskPost = (postId) => {
+    setAskPosts(prev => prev.map(post => {
+      if (post.id !== postId) return post;
+      return { ...post, replies: post.replies + 1 };
+    }));
+  };
+
+  const submitCommunityPost = () => {
+    if (!newPostText.trim()) return;
+    const content = newPostText.trim();
+    setCommunityPosts(prev => [{
+      id: `cp-${Date.now()}`,
+      user: '我',
+      dish: content,
+      emoji: newPostEmoji,
+      reactions: { yum: 0, save: 0, curious: 0 },
+      time: '刚刚',
+      avatarConfig: currentAvatarConfig,
+    }, ...prev]);
+    setNewPostText('');
+    setNewPostEmoji('🍲');
+    setShowCreatePost(false);
+  };
+
+  const submitAskPost = () => {
+    if (!newAskText.trim()) return;
+    const question = newAskText.trim();
+    setAskPosts(prev => [{
+      id: `ap-${Date.now()}`,
+      user: '我',
+      question,
+      replies: 0,
+      time: '刚刚',
+      avatarConfig: currentAvatarConfig,
+    }, ...prev]);
+    setNewAskText('');
+    setShowCreateAsk(false);
+    setCommunityTab('ask');
+  };
+
+  const cycleEatoutLocation = () => {
+    setEatoutLocationIndex(prev => (prev + 1) % eatoutLocations.length);
+    setEatoutBatch(0);
+    setEatoutActionMessage('已切换地点,推荐已刷新');
+  };
+
+  const getRecipeIdByName = (dishName) => {
+    const recipe = recipeCatalog.find(item => item.name === dishName);
+    return recipe ? recipe.id : null;
+  };
+
+  const togglePlannedRecipe = (dishName) => {
+    const recipeId = getRecipeIdByName(dishName);
+    if (!recipeId) return;
+    setPlannedRecipeIds(prev => prev.includes(recipeId) ? prev.filter(id => id !== recipeId) : [...prev, recipeId]);
+    setCookActionMessage(prev => prev === `已安排 ${dishName} 为本餐目标` ? `已取消 ${dishName} 本餐安排` : `已安排 ${dishName} 为本餐目标`);
+  };
+
+  const toggleShoppingRecipe = (dishName) => {
+    const recipeId = getRecipeIdByName(dishName);
+    if (!recipeId) return;
+    setShoppingRecipeIds(prev => prev.includes(recipeId) ? prev.filter(id => id !== recipeId) : [...prev, recipeId]);
+    setCookActionMessage(prev => prev === `${dishName} 已加入购物清单` ? `${dishName} 已从购物清单移除` : `${dishName} 已加入购物清单`);
+  };
+
+  useEffect(() => {
+    setCookBatch(0);
+  }, [healthMode, specialMode, selectedHealthGoals, selectedMoods, dislikedFoods, allergies]);
 
   // 智能匹配函数:根据用户选择的健康目标、心情、不想吃、过敏 → 给每道菜打分,返回排序后的推荐
   const getRecommendedDishes = () => {
@@ -540,6 +688,8 @@ export default function WhatToEatToday() {
 
   if (screen === 'cook') {
     const rec = getRecommendedDishes();
+    const offset = rec.dishes.length > 0 ? cookBatch % rec.dishes.length : 0;
+    const displayedCookDishes = rec.dishes.slice(offset).concat(rec.dishes.slice(0, offset));
     return (
       <div className="w-full max-w-sm mx-auto bg-gradient-to-b from-orange-50 to-amber-50 min-h-screen pb-24">
         <div className="p-6">
@@ -550,162 +700,44 @@ export default function WhatToEatToday() {
           <h2 className="text-2xl font-bold text-orange-900 mb-1">在家做饭 🏠</h2>
           <p className="text-orange-600 text-sm mb-5">挑一道暖心好菜</p>
 
-          {/* 健康模式 */}
-          <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Heart size={18} className="text-rose-500" />
-                <span className="text-sm font-semibold text-gray-800">健康模式</span>
-                {selectedHealthGoals.length > 0 && (
-                  <span className="text-xs bg-rose-100 text-rose-600 px-2 py-0.5 rounded-full font-medium">{selectedHealthGoals.length} 项</span>
-                )}
-              </div>
-              <button 
-                onClick={() => { setHealthMode(!healthMode); if (healthMode) setSelectedHealthGoals([]); }}
-                className={`w-12 h-7 rounded-full p-0.5 transition ${healthMode ? 'bg-orange-500' : 'bg-gray-300'}`}
-              >
-                <div className={`w-6 h-6 rounded-full bg-white shadow transition-transform ${healthMode ? 'translate-x-5' : ''}`}></div>
-              </button>
+          <HealthFilterPanel
+            healthMode={healthMode}
+            setHealthMode={setHealthMode}
+            selectedHealthGoals={selectedHealthGoals}
+            setSelectedHealthGoals={setSelectedHealthGoals}
+            specialMode={specialMode}
+            setSpecialMode={setSpecialMode}
+            selectedMoods={selectedMoods}
+            setSelectedMoods={setSelectedMoods}
+            dislikedFoods={dislikedFoods}
+            setDislikedFoods={setDislikedFoods}
+            allergies={allergies}
+            setAllergies={setAllergies}
+            healthGoals={healthGoals}
+            moodOptions={moodOptions}
+            dislikeOptions={dislikeOptions}
+            allergyOptions={allergyOptions}
+            toggleHealthGoal={toggleHealthGoal}
+            toggleMood={toggleMood}
+            toggleDislike={toggleDislike}
+            toggleAllergy={toggleAllergy}
+          />
+
+          <button
+            onClick={() => setScreen('healthStatus')}
+            className="w-full bg-white rounded-2xl p-3 mb-4 shadow-sm text-sm font-medium text-orange-700 active:bg-orange-50"
+          >
+            去“健康状况”页精细设置 →
+          </button>
+
+          {(cookActionMessage || plannedRecipeIds.length > 0 || shoppingRecipeIds.length > 0) && (
+            <div className="bg-white rounded-2xl p-3 mb-3 shadow-sm">
+              {cookActionMessage && <p className="text-xs text-orange-700 mb-1">{cookActionMessage}</p>}
+              <p className="text-xs text-gray-500">
+                本餐已安排 {plannedRecipeIds.length} 道 · 购物清单 {shoppingRecipeIds.length} 项
+              </p>
             </div>
-            {healthMode && (
-              <div className="pt-3 border-t border-orange-100">
-                <p className="text-xs text-gray-500 mb-3">选择你的健康目标(可多选,搭配组合)</p>
-                
-                <p className="text-xs font-semibold text-rose-600 mb-2">💪 身体状况</p>
-                <div className="flex gap-2 flex-wrap mb-3">
-                  {healthGoals.filter(g => g.category === 'condition').map(goal => (
-                    <button 
-                      key={goal.id}
-                      onClick={() => toggleHealthGoal(goal.id)}
-                      className={`text-xs px-3 py-1.5 rounded-full transition ${selectedHealthGoals.includes(goal.id) ? 'bg-rose-500 text-white shadow-sm shadow-rose-200' : 'bg-rose-50 text-rose-700'}`}
-                    >
-                      {goal.emoji} {goal.label}
-                    </button>
-                  ))}
-                </div>
-
-                <p className="text-xs font-semibold text-orange-600 mb-2">🎯 健身目标</p>
-                <div className="flex gap-2 flex-wrap mb-3">
-                  {healthGoals.filter(g => g.category === 'fitness').map(goal => (
-                    <button 
-                      key={goal.id}
-                      onClick={() => toggleHealthGoal(goal.id)}
-                      className={`text-xs px-3 py-1.5 rounded-full transition ${selectedHealthGoals.includes(goal.id) ? 'bg-orange-500 text-white shadow-sm shadow-orange-200' : 'bg-orange-50 text-orange-700'}`}
-                    >
-                      {goal.emoji} {goal.label}
-                    </button>
-                  ))}
-                </div>
-
-                <p className="text-xs font-semibold text-pink-600 mb-2">🌸 女性关怀</p>
-                <div className="flex gap-2 flex-wrap mb-3">
-                  {healthGoals.filter(g => g.category === 'women').map(goal => (
-                    <button 
-                      key={goal.id}
-                      onClick={() => toggleHealthGoal(goal.id)}
-                      className={`text-xs px-3 py-1.5 rounded-full transition ${selectedHealthGoals.includes(goal.id) ? 'bg-pink-500 text-white shadow-sm shadow-pink-200' : 'bg-pink-50 text-pink-700'}`}
-                    >
-                      {goal.emoji} {goal.label}
-                    </button>
-                  ))}
-                </div>
-
-                <p className="text-xs font-semibold text-teal-600 mb-2">🍃 调理养生</p>
-                <div className="flex gap-2 flex-wrap">
-                  {healthGoals.filter(g => g.category === 'wellness').map(goal => (
-                    <button 
-                      key={goal.id}
-                      onClick={() => toggleHealthGoal(goal.id)}
-                      className={`text-xs px-3 py-1.5 rounded-full transition ${selectedHealthGoals.includes(goal.id) ? 'bg-teal-500 text-white shadow-sm shadow-teal-200' : 'bg-teal-50 text-teal-700'}`}
-                    >
-                      {goal.emoji} {goal.label}
-                    </button>
-                  ))}
-                </div>
-
-                {selectedHealthGoals.length > 0 && (
-                  <button 
-                    onClick={() => setSelectedHealthGoals([])}
-                    className="text-xs text-gray-500 mt-3 font-medium"
-                  >
-                    清空选择
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* 特别筛选 */}
-          <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Sparkles size={18} className="text-amber-500" />
-                <span className="text-sm font-semibold text-gray-800">特别筛选</span>
-                {(selectedMoods.length + dislikedFoods.length + allergies.length) > 0 && (
-                  <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">{selectedMoods.length + dislikedFoods.length + allergies.length} 项</span>
-                )}
-              </div>
-              <button 
-                onClick={() => { setSpecialMode(!specialMode); if (specialMode) { setSelectedMoods([]); setDislikedFoods([]); setAllergies([]); } }}
-                className={`w-12 h-7 rounded-full p-0.5 transition ${specialMode ? 'bg-amber-500' : 'bg-gray-300'}`}
-              >
-                <div className={`w-6 h-6 rounded-full bg-white shadow transition-transform ${specialMode ? 'translate-x-5' : ''}`}></div>
-              </button>
-            </div>
-            {specialMode && (
-              <div className="pt-3 border-t border-amber-100">
-                <p className="text-xs text-gray-500 mb-3">根据今天的情况,定制专属推荐</p>
-
-                <p className="text-xs font-semibold text-amber-600 mb-2">💭 今天的心情</p>
-                <div className="flex gap-2 flex-wrap mb-3">
-                  {moodOptions.map(mood => (
-                    <button 
-                      key={mood.id}
-                      onClick={() => toggleMood(mood.id)}
-                      className={`text-xs px-3 py-1.5 rounded-full transition ${selectedMoods.includes(mood.id) ? 'bg-amber-500 text-white shadow-sm shadow-amber-200' : 'bg-amber-50 text-amber-700'}`}
-                    >
-                      {mood.emoji} {mood.label}
-                    </button>
-                  ))}
-                </div>
-
-                <p className="text-xs font-semibold text-gray-600 mb-2">🚫 今天不想吃</p>
-                <div className="flex gap-2 flex-wrap mb-3">
-                  {dislikeOptions.map(opt => (
-                    <button 
-                      key={opt.id}
-                      onClick={() => toggleDislike(opt.id)}
-                      className={`text-xs px-3 py-1.5 rounded-full transition ${dislikedFoods.includes(opt.id) ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-600'}`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-
-                <p className="text-xs font-semibold text-red-600 mb-2">⚠️ 过敏 / 不能吃</p>
-                <div className="flex gap-2 flex-wrap">
-                  {allergyOptions.map(opt => (
-                    <button 
-                      key={opt.id}
-                      onClick={() => toggleAllergy(opt.id)}
-                      className={`text-xs px-3 py-1.5 rounded-full transition ${allergies.includes(opt.id) ? 'bg-red-500 text-white shadow-sm shadow-red-200' : 'bg-red-50 text-red-700'}`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-
-                {(selectedMoods.length + dislikedFoods.length + allergies.length) > 0 && (
-                  <button 
-                    onClick={() => { setSelectedMoods([]); setDislikedFoods([]); setAllergies([]); }}
-                    className="text-xs text-gray-500 mt-3 font-medium"
-                  >
-                    清空选择
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+          )}
 
           {/* 推荐区 */}
           <div className="flex items-center justify-between mb-3">
@@ -724,8 +756,13 @@ export default function WhatToEatToday() {
           )}
 
           <div className="space-y-3">
-            {rec.dishes.map((dish, i) => (
-              <div key={i} className="bg-white rounded-2xl p-4 shadow-sm">
+            {displayedCookDishes.map((dish, i) => {
+              const recipeId = getRecipeIdByName(dish.name);
+              const planned = recipeId ? plannedRecipeIds.includes(recipeId) : false;
+              const inShopping = recipeId ? shoppingRecipeIds.includes(recipeId) : false;
+              const favorited = recipeId ? favoriteRecipeIds.includes(recipeId) : false;
+              return (
+              <div key={`${dish.name}-${i}`} className="bg-white rounded-2xl p-4 shadow-sm">
                 <div className="flex gap-3">
                   <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0">
                     {dish.emoji}
@@ -752,21 +789,33 @@ export default function WhatToEatToday() {
                   </div>
                 </div>
                 <div className="flex gap-2 mt-3 pt-3 border-t border-orange-50">
-                  <button className="flex-1 bg-orange-500 text-white text-xs py-2 rounded-xl font-medium active:scale-95">
-                    就做这个
+                  <button
+                    onClick={() => togglePlannedRecipe(dish.name)}
+                    className={`flex-1 text-xs py-2 rounded-xl font-medium active:scale-95 ${planned ? 'bg-emerald-500 text-white' : 'bg-orange-500 text-white'}`}
+                  >
+                    {planned ? '已安排本餐' : '就做这个'}
                   </button>
-                  <button className="px-3 py-2 bg-amber-50 text-amber-700 text-xs rounded-xl flex items-center gap-1 active:scale-95">
+                  <button
+                    onClick={() => toggleShoppingRecipe(dish.name)}
+                    className={`px-3 py-2 text-xs rounded-xl flex items-center gap-1 active:scale-95 ${inShopping ? 'bg-amber-500 text-white' : 'bg-amber-50 text-amber-700'}`}
+                  >
                     <ShoppingBasket size={14} /> 购物清单
                   </button>
-                  <button className="px-3 py-2 bg-rose-50 text-rose-500 rounded-xl active:scale-95">
+                  <button
+                    onClick={() => recipeId && toggleRecipeFavorite(recipeId)}
+                    className={`px-3 py-2 rounded-xl active:scale-95 ${favorited ? 'bg-rose-500 text-white' : 'bg-rose-50 text-rose-500'}`}
+                  >
                     <Heart size={14} />
                   </button>
                 </div>
               </div>
-            ))}
+            )})}
           </div>
 
-          <button className="w-full mt-4 bg-white text-orange-600 py-3 rounded-2xl font-medium border-2 border-dashed border-orange-300 active:bg-orange-50">
+          <button
+            onClick={() => setCookBatch(prev => prev + 1)}
+            className="w-full mt-4 bg-white text-orange-600 py-3 rounded-2xl font-medium border-2 border-dashed border-orange-300 active:bg-orange-50"
+          >
             🔄 换一批
           </button>
         </div>
@@ -777,6 +826,39 @@ export default function WhatToEatToday() {
   }
 
   if (screen === 'eatout') {
+    const eatoutFilterOptions = [
+      { id: 'all', label: '🍜 全部' },
+      { id: 'chinese', label: '🥟 中餐' },
+      { id: 'japanese', label: '🍱 日料' },
+      { id: 'western', label: '🌮 西餐' },
+      { id: 'healthy', label: '🥗 健康' },
+    ];
+    const currentLocation = eatoutLocations[eatoutLocationIndex];
+    const enrichedRestaurants = restaurantCatalog.map(shop => {
+      let category = 'chinese';
+      if (shop.cuisine.includes('日本')) category = 'japanese';
+      if (shop.cuisine.includes('咖啡')) category = 'western';
+      const isHealthy = shop.cuisine.includes('轻食') || shop.rating >= 4.8;
+      const distanceNumber = parseInt(shop.time.replace(/\D/g, ''), 10) || 10;
+      const locationExtra = eatoutLocationIndex === 0 ? 0 : eatoutLocationIndex * 2;
+      const distance = `${distanceNumber + locationExtra} 分钟`;
+      return { ...shop, category, isHealthy, distance };
+    });
+
+    let filteredRestaurants = enrichedRestaurants.filter(shop => {
+      if (eatoutFilter === 'all') return true;
+      if (eatoutFilter === 'healthy') return shop.isHealthy;
+      return shop.category === eatoutFilter;
+    });
+
+    if (eatoutTravelMode) {
+      filteredRestaurants = [...filteredRestaurants].sort((a, b) => b.rating - a.rating);
+    }
+
+    const offset = filteredRestaurants.length > 0 ? eatoutBatch % filteredRestaurants.length : 0;
+    const rotatedRestaurants = filteredRestaurants.slice(offset).concat(filteredRestaurants.slice(0, offset));
+    const visibleRestaurants = rotatedRestaurants.slice(0, 4);
+
     return (
       <div className="w-full max-w-sm mx-auto bg-gradient-to-b from-amber-50 to-orange-50 min-h-screen pb-24">
         <div className="p-6">
@@ -789,38 +871,81 @@ export default function WhatToEatToday() {
 
           <div className="bg-white rounded-2xl p-3 mb-4 shadow-sm flex items-center gap-2">
             <MapPin size={18} className="text-amber-600 flex-shrink-0" />
-            <span className="text-sm text-gray-700 flex-1">新加坡 · 乌节路</span>
-            <button className="text-xs text-amber-600 font-medium">切换</button>
+            <span className="text-sm text-gray-700 flex-1">{currentLocation.name}</span>
+            <button onClick={cycleEatoutLocation} className="text-xs text-amber-600 font-medium">切换</button>
           </div>
 
-          <div className="bg-gradient-to-r from-amber-100 to-orange-100 rounded-2xl p-4 mb-5">
+          <button
+            onClick={() => setEatoutTravelMode(prev => !prev)}
+            className="w-full bg-gradient-to-r from-amber-100 to-orange-100 rounded-2xl p-4 mb-5 text-left"
+          >
             <div className="flex items-center gap-2 mb-1">
               <Compass size={18} className="text-amber-700" />
               <span className="text-sm font-bold text-amber-900">旅行模式</span>
+              <span className={`text-[10px] px-2 py-0.5 rounded-full ${eatoutTravelMode ? 'bg-amber-500 text-white' : 'bg-white text-amber-700'}`}>
+                {eatoutTravelMode ? '开启中' : '已关闭'}
+              </span>
             </div>
-            <p className="text-xs text-amber-700">第一次来?发现本地不容错过的特色美食 🌍</p>
-          </div>
+            <p className="text-xs text-amber-700">
+              {eatoutTravelMode ? `${currentLocation.tip} 🌍` : '关闭后将按日常口味展示附近餐厅'}
+            </p>
+          </button>
+
+          {eatoutActionMessage && (
+            <div className="bg-white rounded-xl px-3 py-2 mb-3 text-xs text-amber-700 shadow-sm">
+              {eatoutActionMessage}
+            </div>
+          )}
 
           <div className="flex gap-2 mb-5 overflow-x-auto pb-2">
-            {['🍜 全部', '🥟 中餐', '🍱 日料', '🌮 西餐', '🥗 健康'].map(f => (
-              <button key={f} className="bg-white px-4 py-2 rounded-full text-sm whitespace-nowrap shadow-sm border border-amber-100 active:bg-amber-100">
-                {f}
+            {eatoutFilterOptions.map(item => (
+              <button
+                key={item.id}
+                onClick={() => { setEatoutFilter(item.id); setEatoutBatch(0); }}
+                className={`px-4 py-2 rounded-full text-sm whitespace-nowrap shadow-sm border transition ${eatoutFilter === item.id ? 'bg-amber-500 text-white border-amber-500' : 'bg-white border-amber-100 text-gray-700 active:bg-amber-100'}`}
+              >
+                {item.label}
               </button>
             ))}
           </div>
 
-          <p className="text-sm font-semibold text-gray-700 mb-3">附近热门 📍</p>
-          <div className="space-y-3">
-            {restaurants.slice(0, 4).map((r, i) => (
-              <div key={i} className="bg-white rounded-2xl p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-semibold text-gray-700">附近热门 📍</p>
+            <span className="text-xs text-amber-700">共 {filteredRestaurants.length} 家匹配</span>
+          </div>
+
+          {visibleRestaurants.length === 0 ? (
+            <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+              <div className="text-4xl mb-2">🧭</div>
+              <p className="font-semibold text-gray-800 mb-1">当前筛选没有结果</p>
+              <p className="text-xs text-gray-500 mb-3">换个分类或者切换地点试试看</p>
+              <button
+                onClick={() => setEatoutFilter('all')}
+                className="bg-amber-500 text-white px-4 py-2 rounded-xl text-sm font-semibold"
+              >
+                查看全部
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+            {visibleRestaurants.map((r) => (
+              <div key={r.id} className="bg-white rounded-2xl p-4 shadow-sm">
                 <div className="flex gap-3">
                   <div className="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0">
                     {r.emoji}
                   </div>
                   <div className="flex-1">
                     <div className="flex items-start justify-between">
-                      <h4 className="font-bold text-gray-900 text-sm">{r.name}</h4>
-                      <span className="text-xs bg-teal-50 text-teal-600 px-2 py-0.5 rounded-full flex-shrink-0 ml-1">{r.tag}</span>
+                      <div className="flex items-center gap-1.5">
+                        <h4 className="font-bold text-gray-900 text-sm">{r.name}</h4>
+                        <span className="text-xs bg-teal-50 text-teal-600 px-2 py-0.5 rounded-full flex-shrink-0">{r.tag}</span>
+                      </div>
+                      <button
+                        onClick={() => toggleRestaurantFavorite(r.id)}
+                        className="text-lg leading-none ml-2"
+                      >
+                        {favoriteRestaurantIds.includes(r.id) ? '💛' : '🤍'}
+                      </button>
                     </div>
                     <p className="text-xs text-gray-500 mt-0.5">{r.cuisine}</p>
                     <div className="flex items-center gap-3 mt-1.5 text-xs">
@@ -830,14 +955,38 @@ export default function WhatToEatToday() {
                       </div>
                       <div className="flex items-center gap-0.5 text-gray-500">
                         <MapPin size={12} />
-                        <span>{r.time}</span>
+                        <span>步行 {r.distance}</span>
                       </div>
+                    </div>
+                    <div className="flex gap-2 mt-3">
+                      <button
+                        onClick={() => setEatoutActionMessage(`已打开 ${r.name} 导航`)}
+                        className="text-xs px-3 py-1.5 rounded-xl bg-amber-50 text-amber-700"
+                      >
+                        去这家
+                      </button>
+                      <button
+                        onClick={() => setEatoutActionMessage(`已加入 ${r.name} 外卖对比清单`)}
+                        className="text-xs px-3 py-1.5 rounded-xl bg-orange-500 text-white"
+                      >
+                        点外卖
+                      </button>
                     </div>
                   </div>
                 </div>
               </div>
             ))}
-          </div>
+            </div>
+          )}
+
+          {visibleRestaurants.length > 0 && (
+            <button
+              onClick={() => setEatoutBatch(prev => prev + 1)}
+              className="w-full mt-4 bg-white text-amber-600 py-3 rounded-2xl font-medium border-2 border-dashed border-amber-300 active:bg-amber-50"
+            >
+              🔄 换一批
+            </button>
+          )}
         </div>
 
         <BottomNav screen={screen} setScreen={setScreen} />
@@ -1001,7 +1150,69 @@ export default function WhatToEatToday() {
       <div className="w-full max-w-sm mx-auto bg-gradient-to-b from-amber-50 to-orange-50 min-h-screen pb-24">
         <div className="p-6">
           <h2 className="text-2xl font-bold text-orange-900 mb-1">美食社区 👥</h2>
-          <p className="text-orange-600 text-sm mb-5">温暖的美食分享角</p>
+          <p className="text-orange-600 text-sm mb-4">温暖的美食分享角</p>
+
+          <div className="grid grid-cols-2 gap-2 mb-4">
+            <button
+              onClick={() => setShowCreatePost(prev => !prev)}
+              className="bg-white rounded-2xl py-2.5 text-sm font-semibold text-orange-700 shadow-sm active:bg-orange-50"
+            >
+              + 发动态
+            </button>
+            <button
+              onClick={() => setShowCreateAsk(prev => !prev)}
+              className="bg-white rounded-2xl py-2.5 text-sm font-semibold text-orange-700 shadow-sm active:bg-orange-50"
+            >
+              + 提问题
+            </button>
+          </div>
+
+          {showCreatePost && (
+            <div className="bg-white rounded-2xl p-4 mb-3 shadow-sm">
+              <p className="text-sm font-semibold text-gray-900 mb-2">发布你的美食动态</p>
+              <div className="flex gap-2 mb-2">
+                {['🍜', '🥘', '🥗', '🍱', '🍲', '🍖'].map(emoji => (
+                  <button
+                    key={emoji}
+                    onClick={() => setNewPostEmoji(emoji)}
+                    className={`w-9 h-9 rounded-xl text-lg ${newPostEmoji === emoji ? 'bg-orange-100 ring-2 ring-orange-400' : 'bg-gray-100'}`}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+              <textarea
+                value={newPostText}
+                onChange={(e) => setNewPostText(e.target.value)}
+                placeholder="今天吃了什么?或者分享一个做菜小技巧..."
+                className="w-full h-20 bg-orange-50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-orange-300"
+              />
+              <button
+                onClick={submitCommunityPost}
+                className="w-full mt-2 bg-orange-500 text-white py-2.5 rounded-xl font-semibold"
+              >
+                发布
+              </button>
+            </div>
+          )}
+
+          {showCreateAsk && (
+            <div className="bg-white rounded-2xl p-4 mb-3 shadow-sm">
+              <p className="text-sm font-semibold text-gray-900 mb-2">发起一个求助问题</p>
+              <textarea
+                value={newAskText}
+                onChange={(e) => setNewAskText(e.target.value)}
+                placeholder="例如: 剩下的食材怎么做更好吃?"
+                className="w-full h-20 bg-orange-50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-orange-300"
+              />
+              <button
+                onClick={submitAskPost}
+                className="w-full mt-2 bg-orange-500 text-white py-2.5 rounded-xl font-semibold"
+              >
+                发布问题
+              </button>
+            </div>
+          )}
 
           <div className="flex gap-2 bg-white rounded-2xl p-1 mb-5 shadow-sm">
             <button 
@@ -1020,8 +1231,8 @@ export default function WhatToEatToday() {
 
           {communityTab === 'discover' && (
             <div className="space-y-3">
-              {communityPosts.map((post, i) => (
-                <div key={i} className="bg-white rounded-2xl p-4 shadow-sm">
+              {communityPosts.map((post) => (
+                <div key={post.id} className="bg-white rounded-2xl p-4 shadow-sm">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
                       <QQAvatar config={post.avatarConfig} size="xs" />
@@ -1036,13 +1247,22 @@ export default function WhatToEatToday() {
                     {post.emoji}
                   </div>
                   <div className="flex gap-3 text-sm">
-                    <button className="flex items-center gap-1 text-orange-600 active:scale-90">
+                    <button
+                      onClick={() => reactToCommunityPost(post.id, 'yum')}
+                      className="flex items-center gap-1 text-orange-600 active:scale-90"
+                    >
                       😋 <span className="text-xs">{post.reactions.yum}</span>
                     </button>
-                    <button className="flex items-center gap-1 text-rose-500 active:scale-90">
+                    <button
+                      onClick={() => reactToCommunityPost(post.id, 'save')}
+                      className="flex items-center gap-1 text-rose-500 active:scale-90"
+                    >
                       💛 <span className="text-xs">{post.reactions.save}</span>
                     </button>
-                    <button className="flex items-center gap-1 text-amber-600 active:scale-90">
+                    <button
+                      onClick={() => reactToCommunityPost(post.id, 'curious')}
+                      className="flex items-center gap-1 text-amber-600 active:scale-90"
+                    >
                       🤔 <span className="text-xs">{post.reactions.curious}</span>
                     </button>
                   </div>
@@ -1053,8 +1273,8 @@ export default function WhatToEatToday() {
 
           {communityTab === 'ask' && (
             <div className="space-y-3">
-              {askPosts.map((post, i) => (
-                <div key={i} className="bg-white rounded-2xl p-4 shadow-sm">
+              {askPosts.map((post) => (
+                <div key={post.id} className="bg-white rounded-2xl p-4 shadow-sm">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
                       <QQAvatar config={post.avatarConfig} size="xs" />
@@ -1069,26 +1289,392 @@ export default function WhatToEatToday() {
                     <div className="flex items-center gap-1 text-xs text-orange-600">
                       <MessageCircle size={14} /> {post.replies} 条回复
                     </div>
-                    <button className="text-xs text-orange-600 font-medium">去回答 →</button>
+                    <button
+                      onClick={() => replyAskPost(post.id)}
+                      className="text-xs text-orange-600 font-medium"
+                    >
+                      去回答 →
+                    </button>
                   </div>
                 </div>
               ))}
               
-              <button className="w-full bg-orange-500 text-white py-3.5 rounded-2xl font-semibold shadow-md active:scale-95 flex items-center justify-center gap-2 mt-2">
+              <button
+                onClick={() => setShowCreateAsk(true)}
+                className="w-full bg-orange-500 text-white py-3.5 rounded-2xl font-semibold shadow-md active:scale-95 flex items-center justify-center gap-2 mt-2"
+              >
                 <Plus size={18} /> 我也来问一个
               </button>
             </div>
           )}
+        </div>
 
-          <div className="mt-6 bg-gradient-to-r from-teal-100 to-emerald-100 rounded-2xl p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <Heart size={16} className="text-teal-600" />
-              <p className="text-sm font-bold text-teal-900">即将上线:家庭圈</p>
+        <BottomNav screen={screen} setScreen={setScreen} />
+      </div>
+    );
+  }
+
+  if (screen === 'dietaryPreferences') {
+    return (
+      <div className="w-full max-w-sm mx-auto bg-gradient-to-b from-orange-50 to-amber-50 min-h-screen pb-24">
+        <div className="p-6">
+          <button onClick={() => setScreen('profile')} className="mb-4 text-orange-700">
+            <ArrowLeft size={24} />
+          </button>
+          <div className="text-center mb-5">
+            <div className="text-5xl mb-2">🥗</div>
+            <h2 className="text-2xl font-bold text-orange-900">饮食偏好</h2>
+            <p className="text-xs text-orange-600 mt-1">告诉我们你的口味偏好和过敏原,推荐会更贴心</p>
+          </div>
+
+          <div className="bg-white rounded-2xl p-4 mb-3 shadow-sm">
+            <p className="text-lg font-bold text-gray-900 mb-1">🚫 不想吃</p>
+            <p className="text-xs text-gray-500 mb-3">我们会在推荐里避开这些口味</p>
+            <div className="flex gap-2 flex-wrap">
+              {dislikeOptions.map(opt => (
+                <button
+                  key={opt.id}
+                  onClick={() => toggleDislike(opt.id)}
+                  className={`text-xs px-3 py-1.5 rounded-full border transition ${dislikedFoods.includes(opt.id) ? 'bg-orange-500 text-white border-orange-500' : 'bg-orange-50 text-orange-700 border-orange-200'}`}
+                >
+                  {opt.label}
+                </button>
+              ))}
             </div>
-            <p className="text-xs text-teal-700">和家人分享每日餐桌,把爱传递 💛</p>
+          </div>
+
+          <div className="bg-white rounded-2xl p-4 mb-3 shadow-sm">
+            <p className="text-lg font-bold text-gray-900 mb-1">⚠️ 过敏 / 不能吃</p>
+            <p className="text-xs text-gray-500 mb-3">含这些成分的菜品将被严格过滤</p>
+            <div className="flex gap-2 flex-wrap">
+              {allergyOptions.map(opt => (
+                <button
+                  key={opt.id}
+                  onClick={() => toggleAllergy(opt.id)}
+                  className={`text-xs px-3 py-1.5 rounded-full border transition ${allergies.includes(opt.id) ? 'bg-red-500 text-white border-red-500' : 'bg-red-50 text-red-700 border-red-200'}`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-amber-50 rounded-2xl p-3 text-center mb-4">
+            <p className="text-xs text-amber-700">💡 提示:过敏原是硬过滤,菜品会完全不推荐</p>
           </div>
         </div>
 
+        <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-sm bg-orange-50 px-4 py-3 flex gap-2 border-t border-orange-100">
+          <button
+            onClick={() => { setDislikedFoods([]); setAllergies([]); }}
+            className="w-2/5 bg-white border border-orange-200 text-orange-700 py-3 rounded-2xl font-semibold"
+          >
+            清空
+          </button>
+          <button
+            onClick={() => setScreen('profile')}
+            className="w-3/5 bg-orange-500 text-white py-3 rounded-2xl font-semibold shadow-md"
+          >
+            保存并返回
+          </button>
+        </div>
+        <BottomNav screen={screen} setScreen={setScreen} />
+      </div>
+    );
+  }
+
+  if (screen === 'healthStatus') {
+    return (
+      <div className="w-full max-w-sm mx-auto bg-gradient-to-b from-orange-50 to-amber-50 min-h-screen pb-24">
+        <div className="p-6">
+          <button onClick={() => setScreen('profile')} className="mb-4 text-orange-700">
+            <ArrowLeft size={24} />
+          </button>
+          <div className="text-center mb-5">
+            <div className="text-5xl mb-2">❤️</div>
+            <h2 className="text-2xl font-bold text-orange-900">健康状况</h2>
+            <p className="text-xs text-orange-600 mt-1">这里的选择与做饭页健康模式、特别筛选实时同步</p>
+          </div>
+
+          <HealthFilterPanel
+            healthMode={healthMode}
+            setHealthMode={setHealthMode}
+            selectedHealthGoals={selectedHealthGoals}
+            setSelectedHealthGoals={setSelectedHealthGoals}
+            specialMode={specialMode}
+            setSpecialMode={setSpecialMode}
+            selectedMoods={selectedMoods}
+            setSelectedMoods={setSelectedMoods}
+            dislikedFoods={dislikedFoods}
+            setDislikedFoods={setDislikedFoods}
+            allergies={allergies}
+            setAllergies={setAllergies}
+            healthGoals={healthGoals}
+            moodOptions={moodOptions}
+            dislikeOptions={dislikeOptions}
+            allergyOptions={allergyOptions}
+            toggleHealthGoal={toggleHealthGoal}
+            toggleMood={toggleMood}
+            toggleDislike={toggleDislike}
+            toggleAllergy={toggleAllergy}
+          />
+
+          <button
+            onClick={() => setScreen('cook')}
+            className="w-full bg-white text-orange-700 py-3 rounded-2xl border border-orange-200 font-medium mt-2"
+          >
+            去做饭页查看推荐 →
+          </button>
+        </div>
+        <BottomNav screen={screen} setScreen={setScreen} />
+      </div>
+    );
+  }
+
+  if (screen === 'favoriteCuisine') {
+    return (
+      <div className="w-full max-w-sm mx-auto bg-gradient-to-b from-orange-50 to-amber-50 min-h-screen pb-24">
+        <div className="p-6">
+          <button onClick={() => setScreen('profile')} className="mb-4 text-orange-700">
+            <ArrowLeft size={24} />
+          </button>
+          <div className="text-center mb-5">
+            <div className="text-5xl mb-2">🌶️</div>
+            <h2 className="text-2xl font-bold text-orange-900">喜爱菜系</h2>
+            <p className="text-xs text-orange-600 mt-1">选择你喜欢的菜系,推荐会更懂你</p>
+          </div>
+
+          <div className="space-y-3">
+            {cuisineGroups.map(group => (
+              <div key={group.title} className="bg-white rounded-2xl p-4 shadow-sm">
+                <p className="text-lg font-bold text-gray-900 mb-3">{group.icon} {group.title}</p>
+                <div className="flex gap-2 flex-wrap">
+                  {group.items.map(item => (
+                    <button
+                      key={item}
+                      onClick={() => toggleCuisine(item)}
+                      className={`text-xs px-3 py-1.5 rounded-full border transition ${favoriteCuisines.includes(item) ? 'bg-orange-500 text-white border-orange-500' : 'bg-orange-50 text-orange-700 border-orange-200'}`}
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="fixed bottom-16 left-1/2 -translate-x-1/2 w-full max-w-sm bg-orange-50 px-4 py-3 flex gap-2 border-t border-orange-100">
+          <button
+            onClick={() => setFavoriteCuisines([])}
+            className="w-2/5 bg-white border border-orange-200 text-orange-700 py-3 rounded-2xl font-semibold"
+          >
+            清空
+          </button>
+          <button
+            onClick={() => setScreen('profile')}
+            className="w-3/5 bg-orange-500 text-white py-3 rounded-2xl font-semibold shadow-md"
+          >
+            保存并返回
+          </button>
+        </div>
+        <BottomNav screen={screen} setScreen={setScreen} />
+      </div>
+    );
+  }
+
+  if (screen === 'myRecipes') {
+    const favoriteRecipes = recipeCatalog.filter(recipe => favoriteRecipeIds.includes(recipe.id));
+    const showingFavorites = recipeTab === 'favorites';
+    const visibleRecipes = showingFavorites ? favoriteRecipes : recipeCatalog;
+
+    return (
+      <div className="w-full max-w-sm mx-auto bg-gradient-to-b from-orange-50 to-amber-50 min-h-screen pb-24">
+        <div className="p-6">
+          <button onClick={() => setScreen('profile')} className="mb-4 text-orange-700">
+            <ArrowLeft size={24} />
+          </button>
+          <div className="text-center mb-5">
+            <div className="text-5xl mb-2">📖</div>
+            <h2 className="text-2xl font-bold text-orange-900">我的菜谱</h2>
+            <p className="text-xs text-orange-600 mt-1">收藏喜欢的菜品,以后想吃直接翻这里 💛</p>
+          </div>
+
+          <div className="bg-white rounded-2xl p-1 mb-4 shadow-sm flex">
+            <button
+              onClick={() => setRecipeTab('all')}
+              className={`w-1/2 py-2.5 rounded-xl font-semibold text-sm transition ${!showingFavorites ? 'bg-orange-500 text-white shadow-sm' : 'text-gray-500'}`}
+            >
+              全部菜谱 {totalRecipeCount}
+            </button>
+            <button
+              onClick={() => setRecipeTab('favorites')}
+              className={`w-1/2 py-2.5 rounded-xl font-semibold text-sm transition ${showingFavorites ? 'bg-orange-500 text-white shadow-sm' : 'text-gray-500'}`}
+            >
+              我的收藏 {favoriteRecipeIds.length}
+            </button>
+          </div>
+
+          {showingFavorites && visibleRecipes.length === 0 ? (
+            <div className="bg-white rounded-2xl p-8 shadow-sm text-center">
+              <div className="text-5xl mb-2">🍽️</div>
+              <p className="text-2xl font-bold text-orange-900 mb-1">还没有收藏</p>
+              <p className="text-xs text-gray-500 mb-4">点击下方“全部菜谱”标签,在喜欢的菜品上点 🤍 收藏</p>
+              <button
+                onClick={() => setRecipeTab('all')}
+                className="bg-orange-500 text-white px-6 py-2.5 rounded-2xl font-semibold"
+              >
+                浏览全部菜谱
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {visibleRecipes.map(recipe => (
+                <div key={recipe.id} className="bg-white rounded-2xl p-4 shadow-sm">
+                  <div className="flex gap-3">
+                    <div className="w-14 h-14 rounded-2xl bg-orange-100 flex items-center justify-center text-2xl flex-shrink-0">
+                      {recipe.emoji}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="font-bold text-gray-900 text-xl leading-tight">{recipe.name}</p>
+                          <div className="flex items-center gap-1 text-sm text-gray-500 mt-0.5">
+                            <Clock size={14} />
+                            <span>{recipe.time}</span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => toggleRecipeFavorite(recipe.id)}
+                          className="text-2xl leading-none"
+                        >
+                          {favoriteRecipeIds.includes(recipe.id) ? '💛' : '🤍'}
+                        </button>
+                      </div>
+                      <p className="text-sm text-orange-700 mt-1 italic">"{recipe.why}"</p>
+                      <div className="flex gap-2 mt-2 flex-wrap">
+                        {recipe.tags.map(tag => (
+                          <span key={tag} className="text-xs text-orange-700 font-semibold">{tag}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <BottomNav screen={screen} setScreen={setScreen} />
+      </div>
+    );
+  }
+
+  if (screen === 'familyMembers') {
+    return (
+      <div className="w-full max-w-sm mx-auto bg-gradient-to-b from-orange-50 to-amber-50 min-h-screen pb-24">
+        <div className="p-6">
+          <button onClick={() => setScreen('profile')} className="mb-4 text-orange-700">
+            <ArrowLeft size={24} />
+          </button>
+          <div className="text-center mb-5">
+            <div className="text-5xl mb-2">👨‍👩‍👧</div>
+            <h2 className="text-2xl font-bold text-orange-900">家庭成员</h2>
+            <p className="text-xs text-orange-600 mt-1">添加一起吃饭的家人,推荐时会同时考虑大家偏好</p>
+          </div>
+
+          <div className="bg-white rounded-2xl p-5 shadow-sm mb-4">
+            <p className="text-xl font-bold text-gray-900 mb-3">💡 为什么要添加家庭成员?</p>
+            <ul className="text-sm text-gray-700 space-y-1">
+              <li>· 做饭时自动避开成员过敏原</li>
+              <li>· 推荐更适合全家口味的菜品</li>
+              <li>· 关注孩子和长辈的营养需求</li>
+            </ul>
+          </div>
+
+          {familyMembers.length > 0 && (
+            <div className="space-y-2 mb-3">
+              {familyMembers.map(member => (
+                <div key={member.id} className="bg-white rounded-2xl p-3 shadow-sm flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold text-gray-900">{member.name}</p>
+                    <p className="text-xs text-gray-500">{member.role} · {member.focus}</p>
+                  </div>
+                  <button
+                    onClick={() => setFamilyMembers(prev => prev.filter(m => m.id !== member.id))}
+                    className="text-xs text-red-500"
+                  >
+                    删除
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <button
+            onClick={() => {
+              const presets = [
+                { id: `m${Date.now()}-1`, name: '妈妈', role: '家长', focus: '高血压友好' },
+                { id: `m${Date.now()}-2`, name: '宝宝', role: '孩子', focus: '儿童营养' },
+                { id: `m${Date.now()}-3`, name: '爷爷', role: '长辈', focus: '老人易消化' },
+              ];
+              setFamilyMembers(prev => prev.length === 0 ? presets : [...prev, { id: `m${Date.now()}-x`, name: `成员${prev.length + 1}`, role: '家人', focus: '均衡饮食' }]);
+            }}
+            className="w-full bg-orange-500 text-white py-4 rounded-2xl font-semibold shadow-md"
+          >
+            + 添加家庭成员
+          </button>
+
+          <p className="text-xs text-amber-700 text-center mt-3">🔒 成员信息仅保存在本地,不会上传服务器</p>
+        </div>
+        <BottomNav screen={screen} setScreen={setScreen} />
+      </div>
+    );
+  }
+
+  if (screen === 'settings') {
+    return (
+      <div className="w-full max-w-sm mx-auto bg-gradient-to-b from-orange-50 to-amber-50 min-h-screen pb-24">
+        <div className="p-6">
+          <button onClick={() => setScreen('profile')} className="mb-4 text-orange-700">
+            <ArrowLeft size={24} />
+          </button>
+          <div className="text-center mb-5">
+            <div className="text-5xl mb-2">⚙️</div>
+            <h2 className="text-2xl font-bold text-orange-900">设置</h2>
+            <p className="text-xs text-orange-600 mt-1">管理提醒、隐私和推荐行为</p>
+          </div>
+
+          <div className="space-y-2">
+            <SettingRow
+              icon="🔔"
+              label="用餐提醒"
+              desc="早餐/午餐/晚餐时间提醒"
+              value={settings.reminder}
+              onToggle={() => toggleSetting('reminder')}
+            />
+            <SettingRow
+              icon="🔄"
+              label="同步健康筛选"
+              desc="我的与做饭页共享同一筛选"
+              value={settings.autoSyncFilters}
+              onToggle={() => toggleSetting('autoSyncFilters')}
+            />
+            <SettingRow
+              icon="🌙"
+              label="深色模式"
+              desc="夜间浏览更舒适"
+              value={settings.darkMode}
+              onToggle={() => toggleSetting('darkMode')}
+            />
+            <SettingRow
+              icon="🔒"
+              label="隐私模式"
+              desc="尽量只在本地处理偏好数据"
+              value={settings.privacyMode}
+              onToggle={() => toggleSetting('privacyMode')}
+            />
+          </div>
+        </div>
         <BottomNav screen={screen} setScreen={setScreen} />
       </div>
     );
@@ -1119,26 +1705,56 @@ export default function WhatToEatToday() {
 
           <div className="grid grid-cols-3 gap-2 mb-5">
             <div className="bg-white rounded-2xl p-3 text-center shadow-sm">
-              <div className="text-xl font-bold text-orange-600">12</div>
+              <div className="text-xl font-bold text-orange-600">{totalRecipeCount}</div>
               <div className="text-xs text-gray-500">道菜</div>
             </div>
             <div className="bg-white rounded-2xl p-3 text-center shadow-sm">
-              <div className="text-xl font-bold text-amber-600">5</div>
+              <div className="text-xl font-bold text-amber-600">{totalRestaurantCount}</div>
               <div className="text-xs text-gray-500">家餐厅</div>
             </div>
             <div className="bg-white rounded-2xl p-3 text-center shadow-sm">
-              <div className="text-xl font-bold text-teal-600">8</div>
+              <div className="text-xl font-bold text-teal-600">{totalFavoriteCount}</div>
               <div className="text-xs text-gray-500">已收藏</div>
             </div>
           </div>
 
           <div className="space-y-2">
-            <ProfileRow icon="🥗" label="饮食偏好" />
-            <ProfileRow icon="❤️" label="健康状况" />
-            <ProfileRow icon="🌶️" label="喜爱菜系" />
-            <ProfileRow icon="📖" label="我的菜谱" />
-            <ProfileRow icon="👨‍👩‍👧" label="家庭成员" />
-            <ProfileRow icon="⚙️" label="设置" />
+            <ProfileRow
+              icon="🥗"
+              label="饮食偏好"
+              value={`${dislikedFoods.length + allergies.length} 项已设置`}
+              onClick={() => setScreen('dietaryPreferences')}
+            />
+            <ProfileRow
+              icon="❤️"
+              label="健康状况"
+              value={`${selectedHealthGoals.length + selectedMoods.length} 项关注`}
+              onClick={() => setScreen('healthStatus')}
+            />
+            <ProfileRow
+              icon="🌶️"
+              label="喜爱菜系"
+              value={favoriteCuisines.length > 0 ? `${favoriteCuisines.length} 个已选择` : '未选择'}
+              onClick={() => setScreen('favoriteCuisine')}
+            />
+            <ProfileRow
+              icon="📖"
+              label="我的菜谱"
+              value={`${totalRecipeCount} 道菜 · 收藏 ${favoriteRecipeIds.length}`}
+              onClick={() => setScreen('myRecipes')}
+            />
+            <ProfileRow
+              icon="👨‍👩‍👧"
+              label="家庭成员"
+              value={familyMembers.length > 0 ? `${familyMembers.length} 人` : '未添加'}
+              onClick={() => setScreen('familyMembers')}
+            />
+            <ProfileRow
+              icon="⚙️"
+              label="设置"
+              value="提醒 · 隐私 · 同步"
+              onClick={() => setScreen('settings')}
+            />
           </div>
         </div>
 
@@ -1468,13 +2084,222 @@ function AvatarGenerating({ onDone }) {
   );
 }
 
-function ProfileRow({ icon, label }) {
+function ProfileRow({ icon, label, value, onClick }) {
   return (
-    <button className="w-full bg-white rounded-2xl p-4 shadow-sm flex items-center gap-3 active:bg-orange-50">
+    <button onClick={onClick} className="w-full bg-white rounded-2xl p-4 shadow-sm flex items-center gap-3 active:bg-orange-50">
       <div className="text-2xl">{icon}</div>
-      <span className="text-sm font-medium text-gray-800 flex-1 text-left">{label}</span>
+      <div className="flex-1 text-left">
+        <p className="text-sm font-medium text-gray-800">{label}</p>
+        <p className="text-xs text-gray-500 mt-0.5">{value}</p>
+      </div>
       <span className="text-orange-400">›</span>
     </button>
+  );
+}
+
+function SettingRow({ icon, label, desc, value, onToggle }) {
+  return (
+    <div className="bg-white rounded-2xl p-4 shadow-sm flex items-center gap-3">
+      <div className="text-2xl">{icon}</div>
+      <div className="flex-1">
+        <p className="text-sm font-semibold text-gray-900">{label}</p>
+        <p className="text-xs text-gray-500 mt-0.5">{desc}</p>
+      </div>
+      <button
+        onClick={onToggle}
+        className={`w-12 h-7 rounded-full p-0.5 transition ${value ? 'bg-orange-500' : 'bg-gray-300'}`}
+      >
+        <div className={`w-6 h-6 rounded-full bg-white shadow transition-transform ${value ? 'translate-x-5' : ''}`}></div>
+      </button>
+    </div>
+  );
+}
+
+function HealthFilterPanel({
+  healthMode,
+  setHealthMode,
+  selectedHealthGoals,
+  setSelectedHealthGoals,
+  specialMode,
+  setSpecialMode,
+  selectedMoods,
+  setSelectedMoods,
+  dislikedFoods,
+  setDislikedFoods,
+  allergies,
+  setAllergies,
+  healthGoals,
+  moodOptions,
+  dislikeOptions,
+  allergyOptions,
+  toggleHealthGoal,
+  toggleMood,
+  toggleDislike,
+  toggleAllergy,
+}) {
+  return (
+    <>
+      <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Heart size={18} className="text-rose-500" />
+            <span className="text-sm font-semibold text-gray-800">健康模式</span>
+            {selectedHealthGoals.length > 0 && (
+              <span className="text-xs bg-rose-100 text-rose-600 px-2 py-0.5 rounded-full font-medium">{selectedHealthGoals.length} 项</span>
+            )}
+          </div>
+          <button
+            onClick={() => { setHealthMode(!healthMode); if (healthMode) setSelectedHealthGoals([]); }}
+            className={`w-12 h-7 rounded-full p-0.5 transition ${healthMode ? 'bg-orange-500' : 'bg-gray-300'}`}
+          >
+            <div className={`w-6 h-6 rounded-full bg-white shadow transition-transform ${healthMode ? 'translate-x-5' : ''}`}></div>
+          </button>
+        </div>
+        {healthMode && (
+          <div className="pt-3 border-t border-orange-100">
+            <p className="text-xs text-gray-500 mb-3">选择你的健康目标(可多选,搭配组合)</p>
+
+            <p className="text-xs font-semibold text-rose-600 mb-2">🩺 慢性健康关注</p>
+            <div className="flex gap-2 flex-wrap mb-3">
+              {healthGoals.filter(g => g.category === 'condition').map(goal => (
+                <button
+                  key={goal.id}
+                  onClick={() => toggleHealthGoal(goal.id)}
+                  className={`text-xs px-3 py-1.5 rounded-full transition ${selectedHealthGoals.includes(goal.id) ? 'bg-rose-500 text-white shadow-sm shadow-rose-200' : 'bg-rose-50 text-rose-700'}`}
+                >
+                  {goal.emoji} {goal.label}
+                </button>
+              ))}
+            </div>
+
+            <p className="text-xs font-semibold text-orange-600 mb-2">💪 健身与体重管理</p>
+            <div className="flex gap-2 flex-wrap mb-3">
+              {healthGoals.filter(g => g.category === 'fitness').map(goal => (
+                <button
+                  key={goal.id}
+                  onClick={() => toggleHealthGoal(goal.id)}
+                  className={`text-xs px-3 py-1.5 rounded-full transition ${selectedHealthGoals.includes(goal.id) ? 'bg-orange-500 text-white shadow-sm shadow-orange-200' : 'bg-orange-50 text-orange-700'}`}
+                >
+                  {goal.emoji} {goal.label}
+                </button>
+              ))}
+            </div>
+
+            <p className="text-xs font-semibold text-pink-600 mb-2">🌸 女性专属</p>
+            <div className="flex gap-2 flex-wrap mb-3">
+              {healthGoals.filter(g => g.category === 'women').map(goal => (
+                <button
+                  key={goal.id}
+                  onClick={() => toggleHealthGoal(goal.id)}
+                  className={`text-xs px-3 py-1.5 rounded-full transition ${selectedHealthGoals.includes(goal.id) ? 'bg-pink-500 text-white shadow-sm shadow-pink-200' : 'bg-pink-50 text-pink-700'}`}
+                >
+                  {goal.emoji} {goal.label}
+                </button>
+              ))}
+            </div>
+
+            <p className="text-xs font-semibold text-teal-600 mb-2">🛡️ 日常养护</p>
+            <div className="flex gap-2 flex-wrap">
+              {healthGoals.filter(g => g.category === 'wellness').map(goal => (
+                <button
+                  key={goal.id}
+                  onClick={() => toggleHealthGoal(goal.id)}
+                  className={`text-xs px-3 py-1.5 rounded-full transition ${selectedHealthGoals.includes(goal.id) ? 'bg-teal-500 text-white shadow-sm shadow-teal-200' : 'bg-teal-50 text-teal-700'}`}
+                >
+                  {goal.emoji} {goal.label}
+                </button>
+              ))}
+            </div>
+
+            {selectedHealthGoals.length > 0 && (
+              <button
+                onClick={() => setSelectedHealthGoals([])}
+                className="text-xs text-gray-500 mt-3 font-medium"
+              >
+                清空选择
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="bg-white rounded-2xl p-4 mb-4 shadow-sm">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Sparkles size={18} className="text-amber-500" />
+            <span className="text-sm font-semibold text-gray-800">特别筛选</span>
+            {(selectedMoods.length + dislikedFoods.length + allergies.length) > 0 && (
+              <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">{selectedMoods.length + dislikedFoods.length + allergies.length} 项</span>
+            )}
+          </div>
+          <button
+            onClick={() => {
+              setSpecialMode(!specialMode);
+              if (specialMode) {
+                setSelectedMoods([]);
+                setDislikedFoods([]);
+                setAllergies([]);
+              }
+            }}
+            className={`w-12 h-7 rounded-full p-0.5 transition ${specialMode ? 'bg-amber-500' : 'bg-gray-300'}`}
+          >
+            <div className={`w-6 h-6 rounded-full bg-white shadow transition-transform ${specialMode ? 'translate-x-5' : ''}`}></div>
+          </button>
+        </div>
+        {specialMode && (
+          <div className="pt-3 border-t border-amber-100">
+            <p className="text-xs text-gray-500 mb-3">根据今天状态定制推荐结果</p>
+            <p className="text-xs font-semibold text-amber-600 mb-2">💭 今天的心情</p>
+            <div className="flex gap-2 flex-wrap mb-3">
+              {moodOptions.map(mood => (
+                <button
+                  key={mood.id}
+                  onClick={() => toggleMood(mood.id)}
+                  className={`text-xs px-3 py-1.5 rounded-full transition ${selectedMoods.includes(mood.id) ? 'bg-amber-500 text-white shadow-sm shadow-amber-200' : 'bg-amber-50 text-amber-700'}`}
+                >
+                  {mood.emoji} {mood.label}
+                </button>
+              ))}
+            </div>
+
+            <p className="text-xs font-semibold text-gray-600 mb-2">🚫 今天不想吃</p>
+            <div className="flex gap-2 flex-wrap mb-3">
+              {dislikeOptions.map(opt => (
+                <button
+                  key={opt.id}
+                  onClick={() => toggleDislike(opt.id)}
+                  className={`text-xs px-3 py-1.5 rounded-full transition ${dislikedFoods.includes(opt.id) ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-600'}`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+
+            <p className="text-xs font-semibold text-red-600 mb-2">⚠️ 过敏 / 不能吃</p>
+            <div className="flex gap-2 flex-wrap">
+              {allergyOptions.map(opt => (
+                <button
+                  key={opt.id}
+                  onClick={() => toggleAllergy(opt.id)}
+                  className={`text-xs px-3 py-1.5 rounded-full transition ${allergies.includes(opt.id) ? 'bg-red-500 text-white shadow-sm shadow-red-200' : 'bg-red-50 text-red-700'}`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+
+            {(selectedMoods.length + dislikedFoods.length + allergies.length) > 0 && (
+              <button
+                onClick={() => { setSelectedMoods([]); setDislikedFoods([]); setAllergies([]); }}
+                className="text-xs text-gray-500 mt-3 font-medium"
+              >
+                清空选择
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </>
   );
 }
 
